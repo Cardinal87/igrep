@@ -12,7 +12,7 @@ endif()
 project ("igrep")
 
 # Добавьте источник в исполняемый файл этого проекта.
-add_executable (igrep "igrep.cpp" "igrep.h" "include/indexer/FileIndexer.h")
+add_executable (igrep "igrep.cpp" "igrep.h" "include/indexer/FileIndexer.h" "include/indexer/Position.h")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET igrep PROPERTY CXX_STANDARD 20)
