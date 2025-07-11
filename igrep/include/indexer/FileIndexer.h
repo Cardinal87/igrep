@@ -2,16 +2,14 @@
 
 #include<filesystem>
 #include "Index.h"
-
-using namespace std::filesystem;
-using namespace std;
+#include<string>
 
 namespace include::indexer
 {
 	class FileIndexer {
 	public:
-		void index_file(path& file);
-		void index_directory(path& dir);
+		void index_file(std::filesystem::path& file);
+		void index_directory(std::filesystem::path& dir);
 
 		void load_index();
 
@@ -20,7 +18,7 @@ namespace include::indexer
 	private:
 		Index& index;
 
-		void save_index(string& filename) const;
+		void save_index(std::string& filename) const;
 
 	};
 
