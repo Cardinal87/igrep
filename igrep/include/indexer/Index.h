@@ -11,14 +11,12 @@ namespace include::indexer {
 		void serialize() const;
 		void deserialize();
 
-		void process_line(std::string line, std::string filename, int line_number);
-		std::vector<Position> get_positions(std::string word) const;
+		void process_line(const std::string& line, const std::string& filename, int line_number);
+		const std::vector<Position>& get_positions(const std::string& word) const;
 
 
 	private:
-		std::unordered_map<std::string, Position> word;
-		
+		std::unordered_map<std::string, std::vector<Position>> words;
 	};
-
 
 }
