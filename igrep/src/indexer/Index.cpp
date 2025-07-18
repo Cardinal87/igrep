@@ -2,7 +2,8 @@
 #include<sstream>
 #include<string>
 #include<utility>
-
+#include<fstream>
+#include<ios>
 
 using namespace std;
 
@@ -33,5 +34,36 @@ namespace include::indexer {
 		return empty;
 	}
 
+	void Index::serialize(const string& path) const {
+		ofstream ofs(path, ios::binary);
+
+		if (!ofs.is_open()) {
+			throw runtime_error("Cannot open file" + path);
+		}
+		size_t map_size = words.size();
+		ofs.write(reinterpret_cast<char*>(&map_size), sizeof(map_size));
+
+		for (const auto& pair : words) {
+
+			size_t key_length = pair.first.length();
+			ofs.write(reinterpret_cast<const char*>(&key_length), sizeof(key_length));
+			ofs.write(pair.first.data(), key_length);
+
+			size_t vector_size = pair.second.size();
+			ofs.write(reinterpret_cast<const char*>(&vector_size), sizeof(vector_size));
+
+			for (const Position& position : pair.second) {
+
+				size_t filename_length = position.filename.length();
+				ofs.write(reinterpret_cast<const char*>(&filename_length), sizeof(filename_length));
+				ofs.write(position.filename.data(), filename_length);
+
+
+				ofs.write(reinterpret_cast<const char*>(&position.indent), sizeof(position.indent));
+				ofs.write(reinterpret_cast<const char*>(&position.line_number), sizeof(position.line_number));
+			}
+		}
+		ofs.close();
+	}
 
 }
