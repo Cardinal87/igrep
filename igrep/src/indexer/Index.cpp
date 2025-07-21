@@ -66,4 +66,62 @@ namespace include::indexer {
 		ofs.close();
 	}
 
+	void Index::deserialize(const string& path) {
+		try {
+			ifstream ifs(path, ios::binary);
+			if (!ifs.is_open()) {
+				throw runtime_error("Cannot open index file" + path);
+			}
+			size_t map_size;
+			ifs.read(reinterpret_cast<char*>(&map_size), sizeof(map_size));
+
+			for (int i = 0; i < map_size; i++) {
+				size_t key_len;
+				ifs.read(reinterpret_cast<char*>(&key_len), sizeof(key_len));
+
+				string key;
+				key.resize(key_len);
+				ifs.read(key.data(), key_len);
+
+				size_t vector_size;
+				ifs.read(reinterpret_cast<char*>(&vector_size), sizeof(vector_size));
+
+				vector<Position> positions;
+				positions.reserve(vector_size);
+
+				for (int j = 0; j < vector_size; j++) {
+					size_t filename_len;
+					ifs.read(reinterpret_cast<char*>(&filename_len), sizeof(filename_len));
+
+					string filename;
+					filename.resize(filename_len);
+					ifs.read(filename.data(), filename_len);
+
+					int indent;
+					int line_number;
+
+					ifs.read(reinterpret_cast<char*>(&indent), sizeof(indent));
+					ifs.read(reinterpret_cast<char*>(&line_number), sizeof(line_number));
+
+					positions.emplace_back(move(filename), indent, line_number);
+
+				}
+				words[move(key)] = move(positions);
+
+				if (!ifs) {
+					throw runtime_error("Error during deserializing index");
+				}
+
+
+			}
+			ifs.close();
+		}
+		catch (const exception& e) {
+			words.clear();
+			throw;
+		}
+	}
+
+
+
 }
