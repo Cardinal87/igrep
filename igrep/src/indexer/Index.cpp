@@ -4,6 +4,7 @@
 #include<utility>
 #include<fstream>
 #include<ios>
+#include<unordered_set>
 
 using namespace std;
 
@@ -11,7 +12,8 @@ namespace include::indexer {
 
 
 	void Index::process_line(const string& line, const string& filename, int line_number) {
-		istringstream iss(line);
+		string normalized = normalize_line(line);
+		istringstream iss(normalized);
 		string word;
 		size_t indent;
 		size_t start_pos = 0;
@@ -116,12 +118,38 @@ namespace include::indexer {
 			}
 			ifs.close();
 		}
-		catch (const exception& e) {
+		catch (const exception&) {
 			words.clear();
 			throw;
 		}
 	}
 
 
+	string Index::normalize_line(string line) const {
+		static const unordered_set<char> punctuation = { ',', '.', '\'', '\"', '\\', ':', '/', ';','[','{', '}', ']', '@', '#', '$', '!', '?', '-', '+', '=', '&', '^', '%', '~', '_'};
+
+		for (auto it = line.begin(); it != line.end(); it++) {
+			if (punctuation.count(*it) == 1) {
+				*it = ' ';
+			}
+		}
+
+		return remove_extra_spaces(line);
+	}
+
+	string Index::remove_extra_spaces(const string& line) const {
+		string clean_line = "";
+		bool is_prev_space = false;
+		for (auto it = line.begin(); it != line.end(); it++) {
+			if (*it == ' ' && is_prev_space) {
+				continue;
+			}
+
+			clean_line += *it;
+			is_prev_space = *it == ' ';
+		}
+
+		return clean_line;
+	}
 
 }
