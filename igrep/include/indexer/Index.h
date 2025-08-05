@@ -19,8 +19,7 @@ namespace include::indexer {
 	private:
 		std::unordered_map<std::string, std::vector<Position>> words;
 
-		std::string normalize_line(std::string line) const;
-		std::string remove_extra_spaces(const std::string& line) const;
+		
 	};
 
 }

@@ -1,4 +1,5 @@
 #include "../../include/indexer/Index.h"
+#include "../../include/utils/StringUtils.h"
 #include<sstream>
 #include<string>
 #include<utility>
@@ -6,13 +7,16 @@
 #include<ios>
 #include<unordered_set>
 
+
 using namespace std;
+using namespace include::utils;
+
 
 namespace include::indexer {
 
 
 	void Index::process_line(const string& line, const string& filename, int line_number) {
-		string normalized = normalize_line(line);
+		string normalized =  StringUtils::normalize_line(line);
 		istringstream iss(normalized);
 		string word;
 		size_t indent;
@@ -125,31 +129,6 @@ namespace include::indexer {
 	}
 
 
-	string Index::normalize_line(string line) const {
-		static const unordered_set<char> punctuation = { ',', '.', '\'', '\"', '\\', ':', '/', ';','[','{', '}', ']', '@', '#', '$', '!', '?', '-', '+', '=', '&', '^', '%', '~', '_'};
-
-		for (auto it = line.begin(); it != line.end(); it++) {
-			if (punctuation.count(*it) == 1) {
-				*it = ' ';
-			}
-		}
-
-		return remove_extra_spaces(line);
-	}
-
-	string Index::remove_extra_spaces(const string& line) const {
-		string clean_line = "";
-		bool is_prev_space = false;
-		for (auto it = line.begin(); it != line.end(); it++) {
-			if (*it == ' ' && is_prev_space) {
-				continue;
-			}
-
-			clean_line += *it;
-			is_prev_space = *it == ' ';
-		}
-
-		return clean_line;
-	}
+	
 
 }
