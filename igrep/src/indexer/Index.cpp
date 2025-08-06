@@ -9,10 +9,10 @@
 
 
 using namespace std;
-using namespace include::utils;
+using namespace igrep::utils;
 
 
-namespace include::indexer {
+namespace igrep::indexer {
 
 	
 	void Index::process_line(const string& line, const string& filename, int line_number) {

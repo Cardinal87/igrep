@@ -5,7 +5,7 @@
 #include<unordered_map>
 #include<vector>
 
-namespace include::indexer {
+namespace igrep::indexer {
 	
 	class Index {
 	public:

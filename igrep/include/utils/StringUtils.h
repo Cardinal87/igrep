@@ -2,7 +2,7 @@
 
 #include<string>
 
-namespace include::utils{
+namespace igrep::utils{
     class StringUtils{
 
         public:

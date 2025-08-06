@@ -7,11 +7,11 @@
 
 using namespace std;
 using namespace std::filesystem;
-using namespace include::indexer;
-using namespace include::utils;
+using namespace igrep::indexer;
+using namespace igrep::utils;
 
 
-namespace include::indexer {
+namespace igrep::indexer {
 
 	
 

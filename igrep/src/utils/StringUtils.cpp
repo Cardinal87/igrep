@@ -4,7 +4,7 @@
 
 using namespace std;
 
-namespace include::utils{
+namespace igrep::utils{
 
     string StringUtils::normalize_line(string line){
         static const unordered_set<char> punctuation = { ',', '.', '\'', '\"', '\\', ':', '/', ';','[','{', '}', ']', '@', '#', '$', '!', '?', '-', '+', '=', '&', '^', '%', '~', '_'};

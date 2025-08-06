@@ -3,7 +3,7 @@
 
 #include<string>
 
-namespace include::searcher
+namespace igrep::searcher
 {
    struct SearchResult
    {

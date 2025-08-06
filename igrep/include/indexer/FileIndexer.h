@@ -4,7 +4,7 @@
 #include "Index.h"
 #include<string>
 
-namespace include::indexer
+namespace igrep::indexer
 {
 	class FileIndexer {
 	public:

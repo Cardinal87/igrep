@@ -2,20 +2,20 @@
 
 #include<vector>
 #include<string>
-#include "igrep/include/indexer/Index.h"
+#include "../../include/indexer/Index.h"
 #include "SearchResult.h"
 
 
 
-namespace include::searcher{
+namespace igrep::searcher{
     class Searcher{
         public:
-            explicit Searcher(const include::indexer::Index& index);
+            explicit Searcher(const igrep::indexer::Index& index);
 
             std::vector<SearchResult> search(const std::string& query) const;
 
         private:
-            const include::indexer::Index& index_;
+            const igrep::indexer::Index& index_;
 
 
     };
