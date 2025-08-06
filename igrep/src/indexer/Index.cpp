@@ -14,7 +14,7 @@ using namespace include::utils;
 
 namespace include::indexer {
 
-
+	
 	void Index::process_line(const string& line, const string& filename, int line_number) {
 		string normalized =  StringUtils::normalize_line(line);
 		istringstream iss(normalized);

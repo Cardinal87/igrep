@@ -9,6 +9,8 @@ namespace include::indexer {
 	
 	class Index {
 	public:
+		Index() = default;
+
 		void serialize(const std::string& path) const;
 		void deserialize(const std::string& path);
 

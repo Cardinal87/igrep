@@ -8,20 +8,19 @@ namespace include::indexer
 {
 	class FileIndexer {
 	public:
-		void index_file(std::filesystem::path& file);
-		void index_directory(std::filesystem::path& dir);
+		FileIndexer() = default;
+		
+		void index_file(const std::filesystem::path& file);
+		void index_directory(const std::filesystem::path& dir);
 
 		void load_index();
+
+		void save_index() const;
 
 		const Index& get_index() const { return index; };
 	
 	private:
-		Index& index;
-
-		void save_index(std::string& filename) const;
-
+		Index index;
+		
 	};
-
-
-
 }
