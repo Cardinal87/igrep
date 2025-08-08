@@ -18,16 +18,16 @@ namespace igrep::indexer {
 	void FileIndexer::index_file(const path& file_path) {
 		ifstream ifs;
 		ifs.open(file_path);
-
+		int word_index = 1;
 		if (ifs.is_open()) {
 			string line;
 			size_t line_number = 1;
 			while (getline(ifs, line)) {
-				index.process_line(line, file_path.string(), line_number++);
+				index.process_line(line, file_path.string(), line_number++, word_index);
 			}
 		}
 		else {
-			throw runtime_error(format("Unable to open file {}", file_path));
+			throw runtime_error(format("Unable to open file {}", file_path.string()));
 		}
 
 		ifs.close();
