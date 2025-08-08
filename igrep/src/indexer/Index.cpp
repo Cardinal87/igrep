@@ -15,7 +15,7 @@ using namespace igrep::utils;
 namespace igrep::indexer {
 
 	
-	void Index::process_line(const string& line, const string& filename, int line_number) {
+	void Index::process_line(const string& line, const string& filename, const int line_number, int& word_index) {
 		string normalized =  StringUtils::normalize_line(line);
 		istringstream iss(normalized);
 		string word;
@@ -24,7 +24,7 @@ namespace igrep::indexer {
 		while (iss >> word) {
 			indent = line.find(word, start_pos);
 			start_pos += word.length();
-			words[move(word)].emplace_back(filename, line_number, indent);
+			words[move(word)].emplace_back(filename, line_number, indent, word_index++);
 		}
 		
 	}

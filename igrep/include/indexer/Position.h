@@ -8,6 +8,7 @@ namespace igrep::indexer {
 		const std::string filename;
 		const int line_number;
 		const int indent;
+		const int word_index;
 	};
 
 }
