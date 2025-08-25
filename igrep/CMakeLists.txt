@@ -21,5 +21,27 @@ add_executable (igrep
 "src/indexer/FileIndexer.cpp")
 
 target_include_directories(igrep PRIVATE include)
+target_compile_definitions(igrep PRIVATE SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+#tests
+enable_testing()
 
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        release-1.12.1
+)
+FetchContent_MakeAvailable(googletest)
 
+add_executable(igrep_tests
+  tests/test_index.cpp
+  src/indexer/Index.cpp
+  src/utils/StringUtils.cpp
+)
+
+target_link_libraries(igrep_tests PRIVATE gtest gtest_main)
+target_include_directories(igrep_tests PRIVATE include)
+
+target_compile_definitions(igrep_tests PRIVATE SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+
+add_test(NAME IndexTests COMMAND igrep_tests)
