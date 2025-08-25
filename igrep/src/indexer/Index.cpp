@@ -64,7 +64,7 @@ namespace igrep::indexer {
 				ofs.write(reinterpret_cast<const char*>(&filename_length), sizeof(filename_length));
 				ofs.write(position.filename.data(), filename_length);
 
-
+				ofs.write(reinterpret_cast<const char*>(&position.word_index), sizeof(position.word_index));
 				ofs.write(reinterpret_cast<const char*>(&position.indent), sizeof(position.indent));
 				ofs.write(reinterpret_cast<const char*>(&position.line_number), sizeof(position.line_number));
 			}
@@ -105,11 +105,13 @@ namespace igrep::indexer {
 
 					int indent;
 					int line_number;
+					int word_index;
 
+					ifs.read(reinterpret_cast<char*>(&word_index), sizeof(word_index));
 					ifs.read(reinterpret_cast<char*>(&indent), sizeof(indent));
 					ifs.read(reinterpret_cast<char*>(&line_number), sizeof(line_number));
 
-					positions.emplace_back(move(filename), indent, line_number);
+					positions.emplace_back(move(filename), line_number, indent, word_index);
 
 				}
 				words[move(key)] = move(positions);
