@@ -1,8 +1,8 @@
 
-#include "../../include/indexer/Index.h"
-#include "../../include/searcher/Searcher.h"
-#include "../../include/searcher/SearchResult.h"
-#include "../../include/utils/StringUtils.h"
+#include "indexer/Index.h"
+#include "searcher/Searcher.h"
+#include "searcher/SearchResult.h"
+#include "utils/StringUtils.h"
 #include<vector>
 #include<sstream>
 #include<string>

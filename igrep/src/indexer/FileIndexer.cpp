@@ -1,6 +1,6 @@
-#include "../../include/indexer/FileIndexer.h"
-#include "../../include/utils/StringUtils.h"
-#include "../../include/indexer/Index.h"
+#include "indexer/FileIndexer.h"
+#include "utils/StringUtils.h"
+#include "indexer/Index.h"
 #include<filesystem>
 #include<fstream>
 #include<format>

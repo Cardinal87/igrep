@@ -1,5 +1,5 @@
-#include "../../include/indexer/Index.h"
-#include "../../include/utils/StringUtils.h"
+#include "indexer/Index.h"
+#include "utils/StringUtils.h"
 #include<sstream>
 #include<string>
 #include<utility>

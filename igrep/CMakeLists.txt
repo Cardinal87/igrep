@@ -2,7 +2,8 @@
 # укажите здесь логику для конкретного проекта.
 #
 cmake_minimum_required (VERSION 3.10)
-
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Включение горячей перезагрузки для компиляторов MSVC, если поддерживается.
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
@@ -12,15 +13,13 @@ endif()
 project ("igrep")
 
 # Добавьте источник в исполняемый файл этого проекта.
-add_executable (igrep "igrep.cpp" "igrep.h" 
-"include/utils/StringUtils.h" "src/utils/StringUtils.cpp" 
-"include/indexer/Index.h" "src/indexer/Index.cpp"
-"include/indexer/Position.h" "include/indexer/FileIndexer.h" 
-"include/searcher/Searcher.h" "include/searcher/SearchResult.h" 
-"src/searcher/Searcher.cpp" "src/indexer/FileIndexer.cpp")
+add_executable (igrep 
+"src/igrep.cpp"
+"src/utils/StringUtils.cpp" 
+"src/indexer/Index.cpp"
+"src/searcher/Searcher.cpp" 
+"src/indexer/FileIndexer.cpp")
 
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET igrep PROPERTY CXX_STANDARD 20)
-endif()
+target_include_directories(igrep PRIVATE include)
 
-# TODO: Добавьте тесты и целевые объекты, если это необходимо.
+
