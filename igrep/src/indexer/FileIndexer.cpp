@@ -37,6 +37,12 @@ namespace igrep::indexer {
 
 	void FileIndexer::index_directory(const path& dir_path) {
 
+		if (!exists(dir_path)){
+			throw runtime_error(format("File or directory {} does not exists", dir_path.string()));
+		}
+		if (!is_directory(dir_path)){
+			throw runtime_error(format("{} is not directory", dir_path.string()));
+		}
 		for (const auto& entry : recursive_directory_iterator(dir_path)) {
 
 			if (is_regular_file(entry.path())) {
