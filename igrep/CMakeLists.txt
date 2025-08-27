@@ -35,13 +35,14 @@ FetchContent_MakeAvailable(googletest)
 
 add_executable(igrep_tests
   tests/test_index.cpp
+  tests/test_file_indexer.cpp
   src/indexer/Index.cpp
+  src/indexer/FileIndexer.cpp
   src/utils/StringUtils.cpp
 )
 
 target_link_libraries(igrep_tests PRIVATE gtest gtest_main)
 target_include_directories(igrep_tests PRIVATE include)
-
 target_compile_definitions(igrep_tests PRIVATE SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 
-add_test(NAME IndexTests COMMAND igrep_tests)
+add_test(NAME AllTests COMMAND igrep_tests)
