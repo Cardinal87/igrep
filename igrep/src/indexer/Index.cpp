@@ -16,21 +16,23 @@ namespace igrep::indexer {
 
 	
 	void Index::process_line(const string& line, const string& filename, const int line_number, int& word_index) {
+		string lower_case_line = StringUtils::to_lower_case_copy(line);
 		string normalized =  StringUtils::normalize_line(line);
 		istringstream iss(normalized);
 		string word;
 		size_t indent;
 		size_t start_pos = 0;
 		while (iss >> word) {
-			indent = line.find(word, start_pos);
-			start_pos += word.length();
+			indent = lower_case_line.find(word, start_pos);
+			start_pos = indent + 1;
 			words[move(word)].emplace_back(filename, line_number, indent, word_index++);
 		}
 		
 	}
 
 	const vector<Position>& Index::get_positions(const string& word) const {
-		auto it = words.find(word);
+		string lower_case_word = StringUtils::to_lower_case_copy(word);
+		auto it = words.find(lower_case_word);
 		if (it != words.end()) {
 			return it->second;
 		}
