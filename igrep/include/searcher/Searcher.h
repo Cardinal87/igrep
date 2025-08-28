@@ -2,9 +2,10 @@
 
 #include<vector>
 #include<string>
-#include "../../include/indexer/Index.h"
-#include "../../include/indexer/Position.h"
+#include "indexer/Index.h"
+#include "indexer/Position.h"
 #include "SearchResult.h"
+#include "SearchChain.h"
 
 
 
@@ -16,9 +17,9 @@ namespace igrep::searcher{
             const std::vector<SearchResult> search(const std::string& query) const;
 
         private:
-            void get_intersections(std::vector<igrep::indexer::Position>& first,const std::vector<igrep::indexer::Position>& second) const;
-            const std::vector<SearchResult> map_result(const std::vector<igrep::indexer::Position>& positions) const;
-            const std::string get_context(const std::string& filename, size_t start_line, size_t end_line) const;
+            void get_intersections(std::vector<igrep::searcher::SearchChain>& chain_vector,const std::vector<igrep::indexer::Position>& positions) const;
+            const std::vector<SearchResult> map_result(const std::vector<igrep::searcher::SearchChain>& chains) const;
+            const std::string get_context(const igrep::searcher::SearchChain& chain) const;
 
             const igrep::indexer::Index& index_;
             
