@@ -36,6 +36,7 @@ FetchContent_MakeAvailable(googletest)
 add_executable(igrep_tests
   tests/test_index.cpp
   tests/test_file_indexer.cpp
+  tests/test_string_utils.cpp
   src/indexer/Index.cpp
   src/indexer/FileIndexer.cpp
   src/utils/StringUtils.cpp
