@@ -18,7 +18,7 @@ namespace igrep::indexer {
 	void FileIndexer::index_file(const path& file_path) {
 		ifstream ifs;
 		ifs.open(file_path);
-		int word_index = 1;
+		size_t word_index = 1;
 		if (ifs.is_open()) {
 			string line;
 			size_t line_number = 1;

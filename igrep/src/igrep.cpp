@@ -20,13 +20,16 @@ int main(int argc, char* argv[])
 	}
 	if (find(args.begin(), args.end(), "-h") != args.end()
 	|| find(args.begin(), args.end(), "--help") != args.end()){
-		cout << "Usage: igrep [OPTION] [PARAMS]" << endl 
+		cout << "Usage: 'igrep [OPTION] [PARAMS]'" << endl 
 		<< "Indexing files:" << endl
-		<< " Index new file: 'igrep save [PARAMS]" << endl
+		<< " Index new file: 'igrep save [PARAMS]'" << endl
 		<< " Require one of the next flags:" << endl
 		<< "\t -f, --file\t specify path to file " << endl
 		<< "\t -d, --directory\t specify directory for recursive indexing" << endl
-		<< "Find query" << endl
+		<< " Delete file from index: 'igrep remove [PARAMS]'" << endl
+		<< " Require one of the next flags:" << endl
+		<< "\t -f, --file\t specify file path (file not required to exists)"
+		<< "Find queries" << endl
 		<< " Usage: 'igrep find [PARAMS]" << endl
 		<< " Require one of the next flags:" << endl
 		<< "\t -q, --query\t specify string you want to find" << endl;
@@ -57,6 +60,7 @@ int main(int argc, char* argv[])
 				if(i + 1 < args.size()){
 					path dirpath = args[i + 1];
 					indexer.index_directory(dirpath);
+					index.serialize("./index.bin");
 					cout << "Directory was successfully indexed";
 					return 0;
 				}
@@ -67,6 +71,29 @@ int main(int argc, char* argv[])
 			}
 		}
 
+		cerr << "Error: no parameters were provided";
+		return 1;
+	}
+
+	if(args[0] == "remove"){
+		Index index;
+		index.deserialize("./index.bin");
+
+		for(size_t i = 0; i < args.size(); i++){
+			if (args[i] == "-f" || args[i] == "--file"){
+				if(i + 1 < args.size()){
+					path filepath = args[i + 1];
+					index.remove_file(filepath);
+					index.serialize("./index.bin");
+					cout << "File was successfully removed from index";
+					return 0;
+				}
+				else{
+					cerr << "Error: file path was not provided";
+					return 1;
+				}
+			}
+		}
 		cerr << "Error: no parameters were provided";
 		return 1;
 	}

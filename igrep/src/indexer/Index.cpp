@@ -17,7 +17,9 @@ using namespace igrep::utils;
 namespace igrep::indexer {
 
 	
-	void Index::process_line(const string& line, const string& filename, const int line_number, int& word_index) {
+	void Index::process_line(const string& line, const string& filename, const size_t& line_number, size_t& word_index) {
+		indexed_files.insert(filename);
+		
 		string lower_case_line = StringUtils::to_lower_case_copy(line);
 		string normalized =  StringUtils::normalize_line(line);
 		istringstream iss(normalized);
@@ -33,7 +35,26 @@ namespace igrep::indexer {
 	}
 
 	void Index::remove_file(const path& filepath){
-
+		if (!indexed_files.contains(filepath)){
+			return;
+		}
+		
+		for(auto it = words.begin(); it != words.end(); ){
+			
+			for(int i = 0; i < (it->second).size(); i++){
+				if ((it->second)[i].filename == filepath){
+					(it->second).erase((it->second).begin() + i);
+					i--;
+				}
+			}
+			if ((it->second).empty()){
+				it = words.erase(it);
+			} 
+			else {
+				it++;
+			}
+		}
+		indexed_files.erase(filepath);
 	}
 
 	const vector<Position>& Index::get_positions(const string& word) const {
@@ -54,6 +75,15 @@ namespace igrep::indexer {
 		if (!ofs.is_open()) {
 			throw runtime_error("Cannot open file" + path);
 		}
+		size_t set_size = indexed_files.size();
+		ofs.write(reinterpret_cast<const char*>(&set_size), sizeof(set_size));
+		for(const auto& el : indexed_files){
+			string string_path = el.string();
+			size_t path_size = string_path.length();
+			ofs.write(reinterpret_cast<const char*>(&path_size), sizeof(path_size));
+			ofs.write(string_path.data(), path_size);
+		}
+
 		size_t map_size = words.size();
 		ofs.write(reinterpret_cast<char*>(&map_size), sizeof(map_size));
 
@@ -86,6 +116,22 @@ namespace igrep::indexer {
 			if (!ifs.is_open()) {
 				throw runtime_error("Cannot open index file" + path);
 			}
+			size_t set_size;
+			ifs.read(reinterpret_cast<char*>(&set_size), sizeof(set_size));
+
+			for (int i = 0; i < set_size; i++){
+				size_t path_size;
+				ifs.read(reinterpret_cast<char*>(&path_size), sizeof(path_size));
+				string file_string;
+				file_string.resize(path_size);
+				ifs.read(file_string.data(), path_size);
+				
+				filesystem::path filepath = file_string;
+				indexed_files.insert(filepath);
+			}
+
+
+
 			size_t map_size;
 			ifs.read(reinterpret_cast<char*>(&map_size), sizeof(map_size));
 

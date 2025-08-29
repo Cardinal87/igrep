@@ -6,9 +6,9 @@ namespace igrep::indexer {
 	struct Position
 	{
 		std::string filename;
-		int line_number;
-		int indent;
-		int word_index;
+		size_t line_number;
+		size_t indent;
+		size_t word_index;
 
 		bool operator==(const Position& other) const{
 			return filename == other.filename &&
