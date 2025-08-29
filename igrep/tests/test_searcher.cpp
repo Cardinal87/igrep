@@ -16,10 +16,10 @@ using namespace igrep::searcher;
 
 
 TEST(SearcherTest, SearchWord_ValidQuery_ReturnWithContext){
-    FileIndexer indexer;
+    Index index;
+    FileIndexer indexer(index);
     path filepath = string(SOURCE_DIR) + "/testdata/wiki_data.txt"; 
     indexer.index_file(filepath);
-    Index index = indexer.get_index();
     Searcher searcher(index);
     string expected_context = "The exact numbers of the fishing fleet, thought to be in poor condition, are not known. "
                               "In 1998, North Korea had eight large fishing vessels (3,750 displacement tonnage,  2,759 gross tons, 83 m length, 2,250 horsepower) "
@@ -39,10 +39,10 @@ TEST(SearcherTest, SearchWord_ValidQuery_ReturnWithContext){
 }
 
 TEST(SearcherTest, SearchQuery_QuerySeparatedByLines_ReturnCorrectContext){
-    FileIndexer indexer;
+    Index index;
+    FileIndexer indexer(index);
     path filepath = string(SOURCE_DIR) + "/testdata/external.txt"; 
     indexer.index_file(filepath);
-    Index index = indexer.get_index();
     Searcher searcher(index);
     string expected_context = "Data of external file\n" 
                               "of the directory testdata\n";
@@ -59,10 +59,10 @@ TEST(SearcherTest, SearchQuery_QuerySeparatedByLines_ReturnCorrectContext){
 
 
 TEST(SearcherTest, SearchQuery_Empty_ReturnEmpty){
-    FileIndexer indexer;
+    Index index;
+    FileIndexer indexer(index);
     path filepath = string(SOURCE_DIR) + "/testdata/wiki_data.txt"; 
     indexer.index_file(filepath);
-    Index index = indexer.get_index();
     Searcher searcher(index);
 
 
@@ -73,10 +73,10 @@ TEST(SearcherTest, SearchQuery_Empty_ReturnEmpty){
 }
 
 TEST(SearcherTest, SearchWord_NonExistent_ReturnEmpty){
-    FileIndexer indexer;
+    Index index;
+    FileIndexer indexer(index);
     path filepath = string(SOURCE_DIR) + "/testdata/wiki_data.txt"; 
     indexer.index_file(filepath);
-    Index index = indexer.get_index();
     Searcher searcher(index);
 
 

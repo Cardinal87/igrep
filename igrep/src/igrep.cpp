@@ -35,8 +35,10 @@ int main(int argc, char* argv[])
 	}
 
 	if (args[0] == "save"){
-		FileIndexer indexer;
-		indexer.load_index();
+		Index index;
+		index.deserialize("./index.bin");
+		FileIndexer indexer(index);
+		
 		
 		for(size_t i = 0; i < args.size(); i++){
 			if (args[i] == "-f" || args[i] == "--file"){
@@ -70,10 +72,10 @@ int main(int argc, char* argv[])
 	}
 
 	if (args[0] == "find"){
-		FileIndexer indexer;
-		indexer.load_index();
+		Index index;
+		index.deserialize("./index.bin");
 
-		Searcher searcher(indexer.get_index());
+		Searcher searcher(index);
 		for(size_t i = 0; i < args.size(); i++){
 			if (args[i] == "-q" || args[i] == "--query"){
 				if(i + 1 < args.size()){

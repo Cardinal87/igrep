@@ -13,7 +13,7 @@ using namespace igrep::utils;
 
 namespace igrep::indexer {
 
-	
+	FileIndexer::FileIndexer(Index& index): _index(index){}
 
 	void FileIndexer::index_file(const path& file_path) {
 		ifstream ifs;
@@ -23,7 +23,7 @@ namespace igrep::indexer {
 			string line;
 			size_t line_number = 1;
 			while (getline(ifs, line)) {
-				index.process_line(line, file_path.string(), line_number++, word_index);
+				_index.process_line(line, file_path.string(), line_number++, word_index);
 			}
 		}
 		else {
@@ -51,13 +51,5 @@ namespace igrep::indexer {
 		}
 	}
 
-
-	void FileIndexer::load_index() {
-		index.deserialize("./index.bin");
-	}
-
-	void FileIndexer::save_index() const {
-		index.serialize("./index.bin");
-	}
 
 }

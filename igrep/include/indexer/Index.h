@@ -4,6 +4,7 @@
 #include<string>
 #include<unordered_map>
 #include<vector>
+#include<filesystem>
 
 namespace igrep::indexer {
 	
@@ -15,6 +16,7 @@ namespace igrep::indexer {
 		void deserialize(const std::string& path);
 
 		void process_line(const std::string& line, const std::string& filename, const int line_number, int& word_index);
+		void remove_file(const std::filesystem::path& filepath);
 		const std::vector<Position>& get_positions(const std::string& word) const;
 
 		bool operator==(const Index& other) const{

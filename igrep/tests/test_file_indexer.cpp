@@ -41,12 +41,11 @@ TEST(FileIndexerTest, IndexFile_ValidPath_CorrectIndex){
         Position{filepath, 8, 253, 324}
     };
 
-
-    FileIndexer indexer;
+    Index index;
+    FileIndexer indexer(index);
     indexer.index_file(filepath);
 
 
-    Index index = indexer.get_index();
     vector<Position> fishing_word_positions = index.get_positions(fishing);
     vector<Position> fish_word_positions = index.get_positions(fish);
     EXPECT_EQ(fishing_word_positions, expected_fishing_word_positions);
@@ -55,7 +54,8 @@ TEST(FileIndexerTest, IndexFile_ValidPath_CorrectIndex){
 
 TEST(FileIndexerTest, IndexFile_NonExistentFile_ThrowRuntimeError){
     path path = "/non/existing/file.txt";
-    FileIndexer indexer;
+    Index index;
+    FileIndexer indexer(index);
     ASSERT_THROW(indexer.index_file(path), runtime_error);
 }
 
@@ -65,13 +65,12 @@ TEST(FileIndexerTest, IndexDirectory_ValidPath_CorrectIndex){
     path external_dir_file = string(SOURCE_DIR) + "/testdata/external.txt";
     auto expected_internal_position = Position{internal_dir_file, 1, 8, 3};
     auto expected_external_position = Position{external_dir_file, 1, 8, 3};
-    FileIndexer indexer;
+    Index index;
+    FileIndexer indexer(index);
     
     
     indexer.index_directory(dirpath);
 
-
-    Index index = indexer.get_index();
     ASSERT_FALSE(index.get_positions("internal").empty());
     ASSERT_FALSE(index.get_positions("external").empty());
 
@@ -83,12 +82,14 @@ TEST(FileIndexerTest, IndexDirectory_ValidPath_CorrectIndex){
 
 TEST(FileIndexerTest, IndexDirectory_NonExistentDir_ThrowRuntimeError){
     path path = "/non/existing/dir";
-    FileIndexer indexer;
+    Index index;
+    FileIndexer indexer(index);
     ASSERT_THROW(indexer.index_directory(path), runtime_error);
 }
 
 TEST(FileIndexerTest, IndexDirectory_PathToFileInstead_ThrowRuntimeError){
     path filepath = string(SOURCE_DIR) + "/testdata/wiki_data.txt";
-    FileIndexer indexer;
+    Index index;
+    FileIndexer indexer(index);
     ASSERT_THROW(indexer.index_directory(filepath), runtime_error);
 }

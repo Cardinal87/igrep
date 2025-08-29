@@ -4,11 +4,13 @@
 #include<string>
 #include<utility>
 #include<fstream>
+#include<filesystem>
 #include<ios>
 #include<unordered_set>
 
 
 using namespace std;
+using namespace std::filesystem;
 using namespace igrep::utils;
 
 
@@ -28,6 +30,10 @@ namespace igrep::indexer {
 			words[move(word)].emplace_back(filename, line_number, indent, word_index++);
 		}
 		
+	}
+
+	void Index::remove_file(const path& filepath){
+
 	}
 
 	const vector<Position>& Index::get_positions(const string& word) const {
