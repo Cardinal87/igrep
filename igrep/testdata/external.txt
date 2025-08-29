@@ -1,1 +1,2 @@
 Data of external file
+of the directory testdata

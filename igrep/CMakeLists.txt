@@ -37,9 +37,11 @@ add_executable(igrep_tests
   tests/test_index.cpp
   tests/test_file_indexer.cpp
   tests/test_string_utils.cpp
+  tests/test_searcher.cpp
   src/indexer/Index.cpp
   src/indexer/FileIndexer.cpp
   src/utils/StringUtils.cpp
+  src/searcher/Searcher.cpp
 )
 
 target_link_libraries(igrep_tests PRIVATE gtest gtest_main)
