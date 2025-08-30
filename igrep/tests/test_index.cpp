@@ -12,7 +12,7 @@ using namespace igrep::indexer;
 
 TEST(IndexTest, ProcessLine_GetPositions_Success){
     Index index;
-    int word_index = 1;
+    size_t word_index = 1;
     string line = "Hello, world";
     path filepath = "/path/to/file.txt";
 
@@ -36,8 +36,8 @@ TEST(IndexTest, GetPositions_NonExistentWord_ReturnEmpty){
 TEST(IndexTest, SerializeIndex_ThenDeserializeToAnother_SameIndexes){
     Index index;
     string line = "Hello, world";
-    int first_file_index = 1;
-    int second_file_index = 1;
+    size_t first_file_index = 1;
+    size_t second_file_index = 1;
     index.process_line(line, "/path/to/file1.txt", 1, first_file_index);
     index.process_line(line, "/path/to/file2.txt", 1, second_file_index);
     path index_path = string(SOURCE_DIR) + "/testdata/index.bin";
@@ -57,4 +57,26 @@ TEST(IndexTest, DeserializeIndex_NonExistentPath_ThrowRuntimeError){
     Index index;
     
     ASSERT_THROW(index.deserialize(index_path), runtime_error);
+}
+
+
+Test(IndexTest, DeleteFile_IndexedFile_CorrectIndex){
+    Index index;
+    Index expected_index;
+    string first_file = "/path/to/file1.txt";
+    string second_file = "/path/to/file2.txt";
+    string first_string = "First file string";
+    string second_string = "Second file string";
+    size_t first_file_index = 1;
+    size_t second_file_index = 1;
+	size_t expected_word_index = 1;
+    index.process_line(first_string, first_file, 1, first_file_index);
+    index.process_line(second_string, second_file, 1, second_file_index);
+    expected_index.process_line(second_string, second_file, 1, expected_word_index);
+
+
+    index.remove_file(first_file);
+
+
+    ASSERT_EQ(index, expected_index);
 }
