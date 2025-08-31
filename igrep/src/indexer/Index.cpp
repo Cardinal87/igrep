@@ -18,7 +18,9 @@ namespace igrep::indexer {
 
 	
 	void Index::process_line(const string& line, const string& filename, const size_t& line_number, size_t& word_index) {
-		indexed_files.insert(filename);
+		path absolute_path = path(absolute(filename));
+		
+		indexed_files.insert(absolute_path);
 		
 		string lower_case_line = StringUtils::to_lower_case_copy(line);
 		string normalized =  StringUtils::normalize_line(line);
@@ -29,20 +31,22 @@ namespace igrep::indexer {
 		while (iss >> word) {
 			indent = lower_case_line.find(word, start_pos);
 			start_pos = indent + 1;
-			words[move(word)].emplace_back(filename, line_number, indent, word_index++);
+			words[move(word)].emplace_back(absolute_path, line_number, indent, word_index++);
 		}
 		
 	}
 
 	void Index::remove_file(const path& filepath){
-		if (!indexed_files.contains(filepath)){
+		path absolute_path = path(absolute(filepath));
+		
+		if (!indexed_files.contains(absolute_path)){
 			return;
 		}
 		
 		for(auto it = words.begin(); it != words.end(); ){
 			
 			for(int i = 0; i < (it->second).size(); i++){
-				if ((it->second)[i].filename == filepath){
+				if ((it->second)[i].filename == absolute_path){
 					(it->second).erase((it->second).begin() + i);
 					i--;
 				}
@@ -54,7 +58,7 @@ namespace igrep::indexer {
 				it++;
 			}
 		}
-		indexed_files.erase(filepath);
+		indexed_files.erase(absolute_path);
 	}
 
 	const vector<Position>& Index::get_positions(const string& word) const {

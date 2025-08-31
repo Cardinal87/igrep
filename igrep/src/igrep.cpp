@@ -11,6 +11,20 @@ using namespace igrep::searcher;
 int main(int argc, char* argv[])
 {
 	vector<string> args(argv + 1, argv + argc);
+	const char* home_var = getenv("HOME");
+	if (!home_var) {
+        std::cerr << "Error: HOME environment variable not set" << std::endl;
+        return 1;
+    }
+	path igrep_dir = path(home_var) / ".config" / "igrep";
+	path index_path = igrep_dir / "index.bin";
+
+	if(!exists(igrep_dir)){
+		create_directories(igrep_dir);
+	}
+
+
+
 
 	if (args.empty()
 	|| find(args.begin(), args.end(), "-v") != args.end()
@@ -28,7 +42,7 @@ int main(int argc, char* argv[])
 		<< "\t -d, --directory\t specify directory for recursive indexing" << endl
 		<< " Delete file from index: 'igrep remove [PARAMS]'" << endl
 		<< " Require one of the next flags:" << endl
-		<< "\t -f, --file\t specify file path (file not required to exists)"
+		<< "\t -f, --file\t specify file path (file does not have to exist)"
 		<< "Find queries" << endl
 		<< " Usage: 'igrep find [PARAMS]" << endl
 		<< " Require one of the next flags:" << endl
@@ -39,7 +53,7 @@ int main(int argc, char* argv[])
 
 	if (args[0] == "save"){
 		Index index;
-		index.deserialize("./index.bin");
+		index.deserialize(index_path);
 		FileIndexer indexer(index);
 		
 		
@@ -48,6 +62,7 @@ int main(int argc, char* argv[])
 				if(i + 1 < args.size()){
 					path filepath = args[i + 1];
 					indexer.index_file(filepath);
+					index.serialize(index_path);
 					cout << "File was successfully indexed";
 					return 0;
 				}
@@ -60,7 +75,7 @@ int main(int argc, char* argv[])
 				if(i + 1 < args.size()){
 					path dirpath = args[i + 1];
 					indexer.index_directory(dirpath);
-					index.serialize("./index.bin");
+					index.serialize(index_path);
 					cout << "Directory was successfully indexed";
 					return 0;
 				}
@@ -77,14 +92,14 @@ int main(int argc, char* argv[])
 
 	if(args[0] == "remove"){
 		Index index;
-		index.deserialize("./index.bin");
+		index.deserialize(index_path);
 
 		for(size_t i = 0; i < args.size(); i++){
 			if (args[i] == "-f" || args[i] == "--file"){
 				if(i + 1 < args.size()){
 					path filepath = args[i + 1];
 					index.remove_file(filepath);
-					index.serialize("./index.bin");
+					index.serialize(index_path);
 					cout << "File was successfully removed from index";
 					return 0;
 				}
@@ -100,7 +115,7 @@ int main(int argc, char* argv[])
 
 	if (args[0] == "find"){
 		Index index;
-		index.deserialize("./index.bin");
+		index.deserialize(index_path);
 
 		Searcher searcher(index);
 		for(size_t i = 0; i < args.size(); i++){

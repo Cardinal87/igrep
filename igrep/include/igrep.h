@@ -13,5 +13,6 @@
 #include "indexer/Index.h"
 #include "searcher/Searcher.h"
 #include "searcher/SearchResult.h"
+#include <cstdlib>
 
 // TODO: установите здесь ссылки на дополнительные заголовки, требующиеся для программы.
