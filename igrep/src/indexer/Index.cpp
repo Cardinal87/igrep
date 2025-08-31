@@ -157,9 +157,9 @@ namespace igrep::indexer {
 					filename.resize(filename_len);
 					ifs.read(filename.data(), filename_len);
 
-					int indent;
-					int line_number;
-					int word_index;
+					size_t indent;
+					size_t line_number;
+					size_t word_index;
 
 					ifs.read(reinterpret_cast<char*>(&word_index), sizeof(word_index));
 					ifs.read(reinterpret_cast<char*>(&indent), sizeof(indent));

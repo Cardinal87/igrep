@@ -60,7 +60,7 @@ TEST(IndexTest, DeserializeIndex_NonExistentPath_ThrowRuntimeError){
 }
 
 
-Test(IndexTest, DeleteFile_IndexedFile_CorrectIndex){
+TEST(IndexTest, DeleteFile_IndexedFile_CorrectIndex){
     Index index;
     Index expected_index;
     string first_file = "/path/to/file1.txt";
