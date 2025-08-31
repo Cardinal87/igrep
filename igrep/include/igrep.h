@@ -14,5 +14,6 @@
 #include "searcher/Searcher.h"
 #include "searcher/SearchResult.h"
 #include <cstdlib>
+#include <format>
 
 // TODO: установите здесь ссылки на дополнительные заголовки, требующиеся для программы.

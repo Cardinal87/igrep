@@ -18,7 +18,8 @@ namespace igrep::indexer {
 		void deserialize(const std::string& path);
 
 		void process_line(const std::string& line, const std::string& filename, const size_t& line_number, size_t& word_index);
-		void remove_file(const std::filesystem::path& filepath);
+		bool remove_file(const std::filesystem::path& filepath);
+		bool is_file_indexed(const std::filesystem::path& filepath) const;
 		const std::vector<Position>& get_positions(const std::string& word) const;
 
 		bool operator==(const Index& other) const{

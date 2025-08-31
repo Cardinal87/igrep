@@ -10,7 +10,7 @@ namespace igrep::indexer
 	public:
 		explicit FileIndexer(Index& index);
 		
-		void index_file(const std::filesystem::path& file);
+		bool index_file(const std::filesystem::path& file);
 		void index_directory(const std::filesystem::path& dir);
 	
 	private:

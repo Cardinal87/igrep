@@ -35,11 +35,11 @@ namespace igrep::indexer {
 		
 	}
 
-	void Index::remove_file(const path& filepath){
+	bool Index::remove_file(const path& filepath){
 		path absolute_path = path(absolute(filepath));
 		
 		if (!indexed_files.contains(absolute_path)){
-			return;
+			return false;
 		}
 		
 		for(auto it = words.begin(); it != words.end(); ){
@@ -58,6 +58,11 @@ namespace igrep::indexer {
 			}
 		}
 		indexed_files.erase(absolute_path);
+		return true;
+	}
+
+	bool Index::is_file_indexed(const path& filepath) const{
+		return indexed_files.find(absolute(filepath)) != indexed_files.end();
 	}
 
 	const vector<Position>& Index::get_positions(const string& word) const {

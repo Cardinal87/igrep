@@ -15,7 +15,11 @@ namespace igrep::indexer {
 
 	FileIndexer::FileIndexer(Index& index): _index(index){}
 
-	void FileIndexer::index_file(const path& file_path) {
+	bool FileIndexer::index_file(const path& file_path) {
+		
+		if (_index.is_file_indexed(file_path)){
+			return false;
+		}
 		
 		if (!Index::extenstions.contains(file_path.extension().string())){
 			throw runtime_error(format("file {} extenstion is not supported", file_path.filename().string()));
@@ -36,6 +40,7 @@ namespace igrep::indexer {
 		}
 
 		ifs.close();
+		return true;
 	}
 
 

@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
 		|| find(args.begin(), args.end(), "--help") != args.end()){
 			cout << "Usage: 'igrep [OPTION] [PARAMS]'" << endl 
 			<< "Indexing files:" << endl
-			<< " Index new file: 'igrep save [PARAMS]'" << endl
+			<< " Index new file: 'igrep index [PARAMS]'" << endl
 			<< " Require one of the next flags:" << endl
 			<< "\t -f, --file\t specify path to file " << endl
 			<< "\t -d, --directory\t specify directory for recursive indexing" << endl
@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 			return 0;
 		}
 
-		if (args[0] == "save"){
+		if (args[0] == "index"){
 			Index index;
 			index.deserialize(index_path);
 			FileIndexer indexer(index);
@@ -62,9 +62,13 @@ int main(int argc, char* argv[])
 				if (args[i] == "-f" || args[i] == "--file"){
 					if(i + 1 < args.size()){
 						path filepath = args[i + 1];
-						indexer.index_file(filepath);
+						bool is_success = indexer.index_file(filepath);
 						index.serialize(index_path);
-						cout << "File was successfully indexed";
+						if (is_success){
+							cout << "File was successfully indexed";
+						} else{
+							cout << "File has already been indexed";
+						}
 						return 0;
 					}
 					else{
@@ -99,9 +103,13 @@ int main(int argc, char* argv[])
 				if (args[i] == "-f" || args[i] == "--file"){
 					if(i + 1 < args.size()){
 						path filepath = args[i + 1];
-						index.remove_file(filepath);
+						bool is_success = index.remove_file(filepath);
 						index.serialize(index_path);
-						cout << "File was successfully removed from index";
+						if (is_success){
+							cout << "File was successfully removed from index";
+						} else{
+							cout << format("{} was not indexed", filepath.string());
+						}
 						return 0;
 					}
 					else{
