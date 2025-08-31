@@ -16,6 +16,11 @@ namespace igrep::indexer {
 	FileIndexer::FileIndexer(Index& index): _index(index){}
 
 	void FileIndexer::index_file(const path& file_path) {
+		
+		if (!Index::extenstions.contains(file_path.extension().string())){
+			throw runtime_error(format("file {} extenstion is not supported", file_path.filename().string()));
+		}
+
 		ifstream ifs;
 		ifs.open(file_path);
 		size_t word_index = 1;
@@ -45,7 +50,7 @@ namespace igrep::indexer {
 		}
 		for (const auto& entry : recursive_directory_iterator(dir_path)) {
 
-			if (is_regular_file(entry.path())) {
+			if (is_regular_file(entry.path()) && Index::extenstions.contains(entry.path().extension().string())) {
 				index_file(entry.path());
 			}
 		}

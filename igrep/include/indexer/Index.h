@@ -11,6 +11,7 @@ namespace igrep::indexer {
 	
 	class Index {
 	public:
+		static inline const std::unordered_set<std::string> extenstions = {".txt", ".log", ".json", ".csv", ".ini"};
 		Index() = default;
 
 		void serialize(const std::string& path) const;
@@ -29,6 +30,7 @@ namespace igrep::indexer {
 	private:
 		std::unordered_map<std::string, std::vector<Position>> words;
 		std::unordered_set<std::filesystem::path> indexed_files;
+		
 		
 	};
 

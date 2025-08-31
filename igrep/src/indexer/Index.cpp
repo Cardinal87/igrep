@@ -19,7 +19,6 @@ namespace igrep::indexer {
 	
 	void Index::process_line(const string& line, const string& filename, const size_t& line_number, size_t& word_index) {
 		path absolute_path = path(absolute(filename));
-		
 		indexed_files.insert(absolute_path);
 		
 		string lower_case_line = StringUtils::to_lower_case_copy(line);
