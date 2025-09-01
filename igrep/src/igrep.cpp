@@ -30,24 +30,43 @@ int main(int argc, char* argv[])
 		if (args.empty()
 		|| find(args.begin(), args.end(), "-v") != args.end()
 		|| find(args.begin(), args.end(), "--version") != args.end()){
-			cout << "igrep 1.0.0" << endl << "Try 'igrep -h' to get more information";
+			cout << "igrep 1.0.0" << endl << "Try 'igrep -h' to get more information" << endl;
 			return 0;
 		}
 		if (find(args.begin(), args.end(), "-h") != args.end()
 		|| find(args.begin(), args.end(), "--help") != args.end()){
-			cout << "Usage: 'igrep [OPTION] [PARAMS]'" << endl 
-			<< "Indexing files:" << endl
-			<< " Index new file: 'igrep index [PARAMS]'" << endl
-			<< " Require one of the next flags:" << endl
-			<< "\t -f, --file\t specify path to file " << endl
-			<< "\t -d, --directory\t specify directory for recursive indexing" << endl
-			<< " Delete file from index: 'igrep remove [PARAMS]'" << endl
-			<< " Require one of the next flags:" << endl
-			<< "\t -f, --file\t specify file path (file does not have to exist)"
-			<< "Find queries" << endl
-			<< " Usage: 'igrep find [PARAMS]" << endl
-			<< " Require one of the next flags:" << endl
-			<< "\t -q, --query\t specify string you want to find" << endl;
+			const int flagWidth = 20; 
+			const int descWidth = 30; 
+			
+			cout << "Usage: igrep [OPTION] [PARAMS]\n\n"
+			
+				<< "INDEXING FILES:\n"
+				<< "  Usage: igrep index [PARAMS]\n"
+				<< "  Flags:\n"
+				<< "    " << left << setw(flagWidth) << "-f, --file" 
+					<< setw(descWidth) << "Specify path to file" << "\n"
+				<< "    " << left << setw(flagWidth) << "-d, --directory" 
+					<< setw(descWidth) << "Specify directory for recursive indexing" << "\n"
+				<< "  Examples:\n"
+				<< "    igrep index -f ./mylog.txt\n"
+				<< "    igrep index -d ./logs\n\n"
+				
+				<< "DELETE FILES FROM INDEX:\n"
+				<< "  Usage: igrep remove [PARAMS]\n"
+				<< "  Flags:\n"
+				<< "    " << left << setw(flagWidth) << "-f, --file" 
+					<< setw(descWidth) << "Specify file path (file does not have to exist)" << "\n"
+				<< "  Examples:\n"
+				<< "    igrep remove -f ./old-log.txt\n\n"
+				
+				<< "FIND QUERIES:\n"
+				<< "  Usage: igrep find [PARAMS]\n"
+				<< "  Flags:\n"
+				<< "    " << left << setw(flagWidth) << "-q, --query" 
+					<< setw(descWidth) << "Specify string you want to find" << "\n"
+				<< "  Examples:\n"
+				<< "    igrep find -q ERROR\n";
+
 
 			return 0;
 		}
