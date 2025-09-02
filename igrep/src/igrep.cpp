@@ -97,12 +97,12 @@ int main(int argc, char* argv[])
 						path filepath = args[i + 1];
 						if (filepath.extension() != ".bin"){
 							cerr << format("Error: invalid index file format {}", filepath.string()) << "\n"
-								 << "File must have .bin format";
+								 << "File must have .bin format" << endl;
 							return 1;
 						}
 						index_path = filepath;
 						index.serialize(index_path);
-						cout << format("Index was successfully created at {}", index_path.string());
+						cout << format("Index was successfully created at {}", index_path.string()) << endl;
 						return 0;
 					}
 					else{
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
 				}
 			}
 			index.serialize(index_path);
-			cout << format("Index was successfully created at {}", index_path.string());
+			cout << format("Index was successfully created at {}", index_path.string()) << endl;
 			return 0;
 		}
 
@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
 						i++;
 					}
 					else{
-						cerr << "Error: file path was not provided";
+						cerr << "Error: file path was not provided" << endl;
 						return 1;
 					}
 				}
@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
 						i++;
 					}
 					else{
-						cerr << "Error: directory path was not provided";
+						cerr << "Error: directory path was not provided" << endl;
 						return 1;
 					}
 				}
@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
 						i++;
 					}
 					else{
-						cerr << "Error: source index path was not provided";
+						cerr << "Error: source index path was not provided" << endl;
 						return 1;
 					}
 				}
@@ -164,21 +164,21 @@ int main(int argc, char* argv[])
 			FileIndexer indexer(index);
 			
 			if (!has_file && !has_dir){
-				cerr << "Error: either -f or -d must be specified";
+				cerr << "Error: either -f or -d must be specified" << endl;
 				return 1;
 			}
 
 			if (has_file){
 				bool is_success = indexer.index_file(file_path);
 				if (is_success){
-					cout << "File was successfully indexed";
+					cout << "File was successfully indexed" << endl;
 				} else{
-					cout << "File has already been indexed";
+					cout << "File has already been indexed" << endl;
 				}
 			}
 			if (has_dir){
 				indexer.index_directory(dir_path);
-				cout << "Directory was successfully indexed";
+				cout << "Directory was successfully indexed" << endl;
 			}
 			
 			index.serialize(index_path);
@@ -196,7 +196,7 @@ int main(int argc, char* argv[])
 						i++;
 					}
 					else{
-						cerr << "Error: file path was not provided";
+						cerr << "Error: file path was not provided" << endl;
 						return 1;
 					}
 				}
@@ -206,7 +206,7 @@ int main(int argc, char* argv[])
 						i++;
 					}
 					else{
-						cerr << "Error: source index path was not provided";
+						cerr << "Error: source index path was not provided" << endl;
 						return 1;
 					}
 				}
@@ -216,15 +216,15 @@ int main(int argc, char* argv[])
 			index.deserialize(index_path);
 
 			if (!has_file){
-				cerr << "Error: -f flag must be specified";
+				cerr << "Error: -f flag must be specified" << endl;
 				return 1;
 			}
 
 			bool is_success = index.remove_file(file_path);
 			if (is_success){
-				cout << "File was successfully removed from index";
+				cout << "File was successfully removed from index" << endl;
 			} else{
-				cout << format("{} was not indexed", file_path.string());
+				cout << format("{} was not indexed", file_path.string()) << endl;
 			}
 			
 			index.serialize(index_path);
@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
 						i++;
 					}	
 					else{
-						cerr << "Error: query was not provided";
+						cerr << "Error: query was not provided" << endl;
 						return 1;
 					}
 				}
@@ -253,7 +253,7 @@ int main(int argc, char* argv[])
 						i++;
 					}
 					else{
-						cerr << "Error: source index path was not provided";
+						cerr << "Error: source index path was not provided" << endl;
 						return 1;
 					}
 				}
@@ -266,7 +266,7 @@ int main(int argc, char* argv[])
 			Searcher searcher(index);
 
 			if (!has_query){
-				cerr << "Error: -q flag must be specified";
+				cerr << "Error: -q flag must be specified" << endl;
 				return 1;
 			}
 
@@ -275,7 +275,7 @@ int main(int argc, char* argv[])
 			for(const auto result: results){
 				cout << format("file {}", result.file_path) << endl
 				<< format("line {}", result.line) << endl
-				<< format("context {}", result.result) << endl << endl;
+				<< format("context:\n {}", result.result) << endl << endl;
 			}
 			
 			if (results.empty()) {
@@ -285,7 +285,7 @@ int main(int argc, char* argv[])
 		}
 
 
-		cout << "Error: invalid option";
+		cout << "Error: invalid option" << endl;
 		return 1;
 	}
 	catch(exception& ex){
