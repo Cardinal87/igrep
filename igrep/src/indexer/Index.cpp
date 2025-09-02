@@ -19,6 +19,7 @@ namespace igrep::indexer {
 	
 	void Index::process_line(const string& line, const string& filename, const size_t& line_number, size_t& word_index) {
 		path absolute_path = path(absolute(filename));
+		absolute_path = canonical(absolute_path);
 		indexed_files.insert(absolute_path);
 		
 		string lower_case_line = StringUtils::to_lower_case_copy(line);
@@ -37,7 +38,8 @@ namespace igrep::indexer {
 
 	bool Index::remove_file(const path& filepath){
 		path absolute_path = path(absolute(filepath));
-		
+		absolute_path = canonical(absolute_path);
+
 		if (!indexed_files.contains(absolute_path)){
 			return false;
 		}
