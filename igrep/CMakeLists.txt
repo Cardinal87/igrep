@@ -10,7 +10,7 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-project ("igrep" VERSION 1.0.0)
+project ("igrep" VERSION 1.1.0)
 
 # Добавьте источник в исполняемый файл этого проекта.
 add_executable (igrep 
@@ -26,7 +26,7 @@ target_compile_definitions(igrep PRIVATE SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 #installation
 install(TARGETS igrep DESTINATION bin)
 set(CPACK_PACKAGE_NAME "igrep")
-set(CPACK_PACKAGE_VERSION "1.0.0")
+set(CPACK_PACKAGE_VERSION "1.1.0")
 set(CPACK_GENERATOR "DEB")
 set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "Indexed version of base Unix grep")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Cardinal87 <googl.acc.2651@gmail.com>")
