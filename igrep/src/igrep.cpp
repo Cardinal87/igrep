@@ -42,37 +42,46 @@ int main(int argc, char* argv[])
 
 				<< "CREATING INDEX:\n"
 				<< "  Usage: igrep create [PARAMS]\n"
-				<< "  Flags:\n"
+				<< "  Optional flags:\n"
 				<< "    " << left << setw(flagWidth) << "-d, --destination"
-					<< setw(descWidth) << "Specify path for index file " + format("(default: {}", index_path.string()) << "\n"
-				<< "  Exmaples:\n"
+					<< setw(descWidth) << "Specify path for index file " + format("(default: {})", index_path.string()) << "\n"
+				<< "  Examples:\n"
 				<< "    igrep create\n"
 				<< "    igrep create -d ~/myindex.bin\n\n"
 
 				<< "INDEXING FILES:\n"
 				<< "  Usage: igrep index [PARAMS]\n"
-				<< "  Flags:\n"
+				<< "  One of the next flags is required:\n"
 				<< "    " << left << setw(flagWidth) << "-f, --file" 
 					<< setw(descWidth) << "Specify path to file" << "\n"
 				<< "    " << left << setw(flagWidth) << "-d, --directory" 
 					<< setw(descWidth) << "Specify directory for recursive indexing" << "\n"
+				<< "  Optional flags:\n"
+				<< "    " << left << setw(flagWidth) << "-s, --source-index" 
+					<< setw(descWidth) << "Specify path to index file " + format("(default: {})", index_path.string()) << "\n"
 				<< "  Examples:\n"
 				<< "    igrep index -f ./mylog.txt\n"
-				<< "    igrep index -d ./logs\n\n"
+				<< "    igrep index -d ./logs -s ~/myindex.bin\n\n"
 				
 				<< "DELETE FILES FROM INDEX:\n"
 				<< "  Usage: igrep remove [PARAMS]\n"
-				<< "  Flags:\n"
+				<< "  One of the next flags is required:\n"
 				<< "    " << left << setw(flagWidth) << "-f, --file" 
 					<< setw(descWidth) << "Specify file path (file does not have to exist)" << "\n"
+				<< "  Optional flags:\n"
+				<< "    " << left << setw(flagWidth) << "-s, --source-index" 
+					<< setw(descWidth) << "Specify path to index file " + format("(default: {})", index_path.string()) << "\n"
 				<< "  Examples:\n"
-				<< "    igrep remove -f ./old-log.txt\n\n"
+				<< "    igrep remove -f ./old-log.txt -s  ~/myindex.bin\n\n"
 				
 				<< "FIND QUERIES:\n"
 				<< "  Usage: igrep find [PARAMS]\n"
-				<< "  Flags:\n"
+				<< "  One of the next flags is required:\n"
 				<< "    " << left << setw(flagWidth) << "-q, --query" 
 					<< setw(descWidth) << "Specify string you want to find" << "\n"
+				<< "  Optional flags:\n"
+				<< "    " << left << setw(flagWidth) << "-s, --source-index" 
+					<< setw(descWidth) << "Specify path to index file " + format("(default: {})", index_path.string()) << "\n"
 				<< "  Examples:\n"
 				<< "    igrep find -q ERROR\n";
 
@@ -89,6 +98,7 @@ int main(int argc, char* argv[])
 						if (filepath.extension() != ".bin"){
 							cerr << format("Error: invalid index file format {}", filepath.string()) << "\n"
 								 << "File must have .bin format";
+							return 1;
 						}
 						index_path = filepath;
 						index.serialize(index_path);
@@ -97,108 +107,181 @@ int main(int argc, char* argv[])
 					}
 					else{
 						cerr << "Error: file path was not provided" << endl;
+						return 1;
 					}
 				}
 			}
+			index.serialize(index_path);
+			cout << format("Index was successfully created at {}", index_path.string());
+			return 0;
 		}
 
 
 		if (args[0] == "index"){
-			Index index;
-			index.deserialize(index_path);
-			FileIndexer indexer(index);
-			
-			
+			bool has_file = false;
+			bool has_dir = false;
+			path file_path;
+			path dir_path;
+
 			for(size_t i = 0; i < args.size(); i++){
-				if (args[i] == "-f" || args[i] == "--file"){
+				if ((args[i] == "-f" || args[i] == "--file") && !(has_file || has_dir)){
 					if(i + 1 < args.size()){
-						path filepath = args[i + 1];
-						bool is_success = indexer.index_file(filepath);
-						index.serialize(index_path);
-						if (is_success){
-							cout << "File was successfully indexed";
-						} else{
-							cout << "File has already been indexed";
-						}
-						return 0;
+						file_path = args[i + 1];
+						has_file = true;
+						i++;
 					}
 					else{
 						cerr << "Error: file path was not provided";
 						return 1;
 					}
 				}
-				else if (args[i] == "-d" || args[i] == "--directory"){
+				else if ((args[i] == "-d" || args[i] == "--directory") && !(has_file || has_dir)){
 					if(i + 1 < args.size()){
-						path dirpath = args[i + 1];
-						indexer.index_directory(dirpath);
-						index.serialize(index_path);
-						cout << "Directory was successfully indexed";
-						return 0;
+						dir_path = args[i + 1];
+						has_dir = true;
+						i++;
 					}
 					else{
 						cerr << "Error: directory path was not provided";
 						return 1;
 					}
 				}
+				else if (args[i] == "-s" || args[i] == "--source-index"){
+					if(i + 1 < args.size()){
+						path path_to_index = args[i + 1];
+						index_path = path_to_index;
+						i++;
+					}
+					else{
+						cerr << "Error: source index path was not provided";
+						return 1;
+					}
+				}
 			}
 
-			cerr << "Error: no parameters were provided";
-			return 1;
-		}
-
-		if(args[0] == "remove"){
 			Index index;
 			index.deserialize(index_path);
+			FileIndexer indexer(index);
+			
+			if (!has_file && !has_dir){
+				cerr << "Error: either -f or -d must be specified";
+				return 1;
+			}
 
+			if (has_file){
+				bool is_success = indexer.index_file(file_path);
+				if (is_success){
+					cout << "File was successfully indexed";
+				} else{
+					cout << "File has already been indexed";
+				}
+			}
+			if (has_dir){
+				indexer.index_directory(dir_path);
+				cout << "Directory was successfully indexed";
+			}
+			
+			index.serialize(index_path);
+			return 0;
+		}
+		
+		if(args[0] == "remove"){
+			bool has_file = false;
+			path file_path;
 			for(size_t i = 0; i < args.size(); i++){
 				if (args[i] == "-f" || args[i] == "--file"){
 					if(i + 1 < args.size()){
-						path filepath = args[i + 1];
-						bool is_success = index.remove_file(filepath);
-						index.serialize(index_path);
-						if (is_success){
-							cout << "File was successfully removed from index";
-						} else{
-							cout << format("{} was not indexed", filepath.string());
-						}
-						return 0;
+						file_path  = args[i + 1];
+						has_file = true;
+						i++;
 					}
 					else{
 						cerr << "Error: file path was not provided";
 						return 1;
 					}
 				}
+				else if (args[i] == "-s" || args[i] == "--source-index"){
+					if(i + 1 < args.size()){
+						index_path = args[i + 1];
+						i++;
+					}
+					else{
+						cerr << "Error: source index path was not provided";
+						return 1;
+					}
+				}
 			}
-			cerr << "Error: no parameters were provided";
-			return 1;
-		}
 
-		if (args[0] == "find"){
 			Index index;
 			index.deserialize(index_path);
 
-			Searcher searcher(index);
+			if (!has_file){
+				cerr << "Error: -f flag must be specified";
+				return 1;
+			}
+
+			bool is_success = index.remove_file(file_path);
+			if (is_success){
+				cout << "File was successfully removed from index";
+			} else{
+				cout << format("{} was not indexed", file_path.string());
+			}
+			
+			index.serialize(index_path);
+			return 0;
+		}
+
+		if (args[0] == "find"){
+			bool has_query = false;
+			string query;
+
 			for(size_t i = 0; i < args.size(); i++){
 				if (args[i] == "-q" || args[i] == "--query"){
 					if(i + 1 < args.size()){
-						const string query = args[i + 1];
-						vector<SearchResult> results = searcher.search(query);
-						for(const auto result: results){
-							cout << format("file {}", result.file_path) << endl
-							<< format("line {}", result.line) << endl
-							<< format("context {}", result.result) << endl << endl;
-						}
-						return 0;
+						query = args[i + 1];
+						has_query = true;
+						i++;
 					}	
 					else{
 						cerr << "Error: query was not provided";
 						return 1;
 					}
 				}
+				else if (args[i] == "-s" || args[i] == "--source-index"){
+					if(i + 1 < args.size()){
+						index_path = args[i + 1];
+						i++;
+					}
+					else{
+						cerr << "Error: source index path was not provided";
+						return 1;
+					}
+				}
 			
 			}
-			cerr << "Error: no params were provided";
-			return 1;
+
+			
+			Index index;
+			index.deserialize(index_path);
+			Searcher searcher(index);
+
+			if (!has_query){
+				cerr << "Error: -q flag must be specified";
+				return 1;
+			}
+
+			
+			vector<SearchResult> results = searcher.search(query);
+			for(const auto result: results){
+				cout << format("file {}", result.file_path) << endl
+				<< format("line {}", result.line) << endl
+				<< format("context {}", result.result) << endl << endl;
+			}
+			
+			if (results.empty()) {
+                cout << "No results were found" << endl;
+            }
+			return 0;
 		}
 
 
