@@ -39,7 +39,16 @@ int main(int argc, char* argv[])
 			const int descWidth = 30; 
 			
 			cout << "Usage: igrep [OPTION] [PARAMS]\n\n"
-			
+
+				<< "CREATING INDEX:\n"
+				<< "  Usage: igrep create [PARAMS]\n"
+				<< "  Flags:\n"
+				<< "    " << left << setw(flagWidth) << "-d, --destination"
+					<< setw(descWidth) << "Specify path for index file " + format("(default: {}", index_path.string()) << "\n"
+				<< "  Exmaples:\n"
+				<< "    igrep create\n"
+				<< "    igrep create -d ~/myindex.bin\n\n"
+
 				<< "INDEXING FILES:\n"
 				<< "  Usage: igrep index [PARAMS]\n"
 				<< "  Flags:\n"
@@ -70,6 +79,29 @@ int main(int argc, char* argv[])
 
 			return 0;
 		}
+
+		if (args[0] == "create"){
+			Index index;
+			for(size_t i = 0; i < args.size(); i++){
+				if (args[i] == "-d" || args[i] == "--destination"){
+					if(i + 1 < args.size()){
+						path filepath = args[i + 1];
+						if (filepath.extension() != ".bin"){
+							cerr << format("Error: invalid index file format {}", filepath.string()) << "\n"
+								 << "File must have .bin format";
+						}
+						index_path = filepath;
+						index.serialize(index_path);
+						cout << format("Index was successfully created at {}", index_path.string());
+						return 0;
+					}
+					else{
+						cerr << "Error: file path was not provided" << endl;
+					}
+				}
+			}
+		}
+
 
 		if (args[0] == "index"){
 			Index index;
@@ -174,7 +206,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 	catch(exception& ex){
-		cerr << "Exception:" << ex.what() << endl;
+		cerr << "Exception: " << ex.what() << endl;
 	}
 }
 

@@ -81,7 +81,7 @@ namespace igrep::indexer {
 		ofstream ofs(path, ios::binary);
 
 		if (!ofs.is_open()) {
-			throw runtime_error("Cannot open file" + path);
+			throw runtime_error("Cannot open file " + path);
 		}
 		size_t set_size = indexed_files.size();
 		ofs.write(reinterpret_cast<const char*>(&set_size), sizeof(set_size));
