@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 		if (args.empty()
 		|| find(args.begin(), args.end(), "-v") != args.end()
 		|| find(args.begin(), args.end(), "--version") != args.end()){
-			cout << "igrep 1.0.0" << endl << "Try 'igrep -h' to get more information" << endl;
+			cout << "igrep 1.1.0" << endl << "Try 'igrep -h' to get more information" << endl;
 			return 0;
 		}
 		if (find(args.begin(), args.end(), "-h") != args.end()
