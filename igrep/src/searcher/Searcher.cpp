@@ -9,6 +9,7 @@
 #include<string>
 #include<fstream>
 #include<format>
+#include<cstdint>
 
 using namespace igrep::indexer;
 using namespace igrep::searcher;
@@ -83,7 +84,7 @@ namespace igrep::searcher{
         string context;
 
         string current_line;
-        size_t current_line_number = 1;
+        uint32_t current_line_number = 1;
         bool read = false;
         while(getline(ifs, current_line)){
             if (current_line_number >= chain.start.line_number && current_line_number <= chain.end.line_number) {

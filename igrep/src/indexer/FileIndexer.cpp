@@ -4,6 +4,7 @@
 #include<filesystem>
 #include<fstream>
 #include<format>
+#include<cstdint>
 
 using namespace std;
 using namespace std::filesystem;
@@ -27,10 +28,10 @@ namespace igrep::indexer {
 
 		ifstream ifs;
 		ifs.open(file_path);
-		size_t word_index = 1;
+		uint32_t word_index = 1;
 		if (ifs.is_open()) {
 			string line;
-			size_t line_number = 1;
+			uint32_t line_number = 1;
 			while (getline(ifs, line)) {
 				_index.process_line(line, file_path.string(), line_number++, word_index);
 			}

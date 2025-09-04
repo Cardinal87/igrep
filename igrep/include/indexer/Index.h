@@ -6,6 +6,7 @@
 #include<vector>
 #include<filesystem>
 #include<unordered_set>
+#include<cstdint>
 
 namespace igrep::indexer {
 	
@@ -17,7 +18,7 @@ namespace igrep::indexer {
 		void serialize(const std::string& path) const;
 		void deserialize(const std::string& path);
 
-		void process_line(const std::string& line, const std::string& filename, const size_t& line_number, size_t& word_index);
+		void process_line(const std::string& line, const std::string& filename, const uint32_t& line_number, uint32_t& word_index);
 		bool remove_file(const std::filesystem::path& filepath);
 		bool is_file_indexed(const std::filesystem::path& filepath) const;
 		const std::vector<Position>& get_positions(const std::string& word) const;

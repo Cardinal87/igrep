@@ -1,14 +1,15 @@
 #pragma once
 
 #include<string>
+#include<cstdint>
 namespace igrep::indexer {
 
 	struct Position
 	{
 		std::string filename;
-		size_t line_number;
-		size_t indent;
-		size_t word_index;
+		uint32_t line_number;
+		uint32_t indent;
+		uint32_t word_index;
 
 		bool operator==(const Position& other) const{
 			return filename == other.filename &&
