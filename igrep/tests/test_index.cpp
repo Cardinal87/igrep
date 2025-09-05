@@ -1,6 +1,7 @@
 #include<gtest/gtest.h>
 #include"indexer/Index.h"
 #include"indexer/Position.h"
+#include"utils/StringUtils.h"
 #include<filesystem>
 #include<fstream>
 #include<string>
@@ -10,18 +11,20 @@
 using namespace std;
 using namespace std::filesystem;
 using namespace igrep::indexer;
+using namespace igrep::utils;
 
 TEST(IndexTest, ProcessLine_GetPositions_Success){
     Index index;
     uint32_t word_index = 1;
     string line = "Hello, world";
     path filepath = "/path/to/file.txt";
+    uint32_t file_id = StringUtils::get_file_hash(filepath);
 
     index.process_line(line, filepath, 1, word_index);
 
     vector<Position> position = index.get_positions("world");
     ASSERT_EQ(position.size(), 1);
-    EXPECT_EQ(position[0].filename, filepath.string());
+    EXPECT_EQ(position[0].file_id, file_id);
     EXPECT_EQ(position[0].line_number, 1);
     EXPECT_EQ(position[0].indent, 7);
     EXPECT_EQ(position[0].word_index, 2);

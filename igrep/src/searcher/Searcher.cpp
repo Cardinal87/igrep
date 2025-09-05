@@ -10,10 +10,12 @@
 #include<fstream>
 #include<format>
 #include<cstdint>
+#include<filesystem>
 
 using namespace igrep::indexer;
 using namespace igrep::searcher;
 using namespace igrep::utils;
+using namespace std::filesystem;
 using namespace std;
 
 namespace igrep::searcher{
@@ -51,7 +53,7 @@ namespace igrep::searcher{
     void Searcher::get_intersections(vector<SearchChain>& chain_vector, const vector<Position>& positions) const{
         for(auto& chain: chain_vector){
             for(const auto position: positions){
-                if(chain.end.filename != position.filename) continue;
+                if(chain.end.file_id != position.file_id) continue;
 
                 if(position.word_index == chain.end.word_index + 1){
                     chain.end = position;
@@ -69,7 +71,8 @@ namespace igrep::searcher{
 
         for (const auto& chain: chains){
             string context = get_context(chain);
-            result.emplace_back(context, chain.start.filename, chain.start.line_number);
+            path filepath = index_.get_path_by_id(chain.start.file_id);
+            result.emplace_back(context, filepath.string(), chain.start.line_number);
 
         }
         return result;
@@ -77,9 +80,10 @@ namespace igrep::searcher{
 
 
     const string Searcher::get_context(const SearchChain& chain) const{
-        ifstream ifs(chain.start.filename);
+        path filepath = index_.get_path_by_id(chain.start.file_id);
+        ifstream ifs(filepath);
         if (!ifs.is_open()){
-            throw runtime_error(format("unable open file {}", chain.start.filename));
+            throw runtime_error(format("unable open file {}", filepath.string()));
         }
         string context;
 

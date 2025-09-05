@@ -2,7 +2,7 @@
 //
 
 #include "igrep.h"
-
+#include"utils/StringUtils.h"
 using namespace std;
 using namespace std::filesystem;
 using namespace igrep::indexer;

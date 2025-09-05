@@ -1,12 +1,22 @@
 #include "utils/StringUtils.h"
 #include<unordered_set>
-
+#include<filesystem>
+#include<cstdint>
+#include<functional>
 
 using namespace std;
+using namespace std::filesystem;
 
 namespace igrep::utils{
 
-    string StringUtils::normalize_line(string line) {
+    uint32_t StringUtils::get_file_hash(const path& filepath){
+		hash<path> path_hasher;
+		size_t hash_value_size_t = path_hasher(filepath);
+		uint32_t hash_value = static_cast<uint32_t>(hash_value_size_t);
+		return hash_value;
+	}
+	
+	string StringUtils::normalize_line(string line) {
         static const unordered_set<char> punctuation = { ',', '.', '\'', '\"', '\\', ':', '/', ';','[','{', '}', ']', '(',')' , '@', '#', '$', '!', '?', '-', '+', '=', '&', '^', '%', '~', '_'};
 
 		for (auto it = line.begin(); it != line.end(); it++) {

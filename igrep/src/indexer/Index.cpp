@@ -16,12 +16,26 @@ using namespace igrep::utils;
 
 namespace igrep::indexer {
 
-	
-	void Index::process_line(const string& line, const string& filename, const uint32_t& line_number, uint32_t& word_index) {
-		path absolute_path = path(absolute(filename));
-		absolute_path = canonical(absolute_path);
-		indexed_files.insert(absolute_path);
+
+	path Index::get_path_by_id(const uint32_t file_id) const{
+		path filepath = id_to_file.at(file_id);
+		return filepath;
+	}
+
+	void Index::process_line(const string& line, const path& filename, const uint32_t& line_number, uint32_t& word_index) {
+		path absolute_path = weakly_canonical(absolute(path(filename)));
 		
+		uint32_t file_id;
+		if (file_to_id.contains(filename)){
+			file_id = file_to_id[absolute_path];
+		}
+		else{
+			file_id = StringUtils::get_file_hash(filename);
+			file_to_id[absolute_path] = file_id;
+			id_to_file[file_id] = absolute_path;
+		}
+
+
 		string lower_case_line = StringUtils::to_lower_case_copy(line);
 		string normalized =  StringUtils::normalize_line(line);
 		istringstream iss(normalized);
@@ -31,23 +45,24 @@ namespace igrep::indexer {
 		while (iss >> word) {
 			indent = lower_case_line.find(word, start_pos);
 			start_pos = indent + 1;
-			words[move(word)].emplace_back(absolute_path, line_number, indent, word_index++);
+			words[move(word)].emplace_back(file_id, line_number, indent, word_index++);
 		}
 		
 	}
 
 	bool Index::remove_file(const path& filepath){
-		path absolute_path = path(absolute(filepath));
-		absolute_path = canonical(absolute_path);
+		path absolute_path = weakly_canonical(absolute(path(filepath)));
 
-		if (!indexed_files.contains(absolute_path)){
+		if (!file_to_id.contains(absolute_path)){
 			return false;
 		}
 		
+		uint32_t file_id = file_to_id[absolute_path];
+
 		for(auto it = words.begin(); it != words.end(); ){
 			
 			for(int i = 0; i < (it->second).size(); i++){
-				if ((it->second)[i].filename == absolute_path){
+				if ((it->second)[i].file_id == file_id){
 					(it->second).erase((it->second).begin() + i);
 					i--;
 				}
@@ -59,12 +74,15 @@ namespace igrep::indexer {
 				it++;
 			}
 		}
-		indexed_files.erase(absolute_path);
+		file_to_id.erase(absolute_path);
+		id_to_file.erase(file_id);
+
 		return true;
 	}
 
 	bool Index::is_file_indexed(const path& filepath) const{
-		return indexed_files.find(absolute(filepath)) != indexed_files.end();
+		path absolute_path = weakly_canonical(absolute(path(filepath)));
+		return file_to_id.contains(absolute_path);
 	}
 
 	const vector<Position>& Index::get_positions(const string& word) const {
@@ -79,16 +97,20 @@ namespace igrep::indexer {
 		return empty;
 	}
 
-	void Index::serialize(const string& path) const {
-		ofstream ofs(path, ios::binary);
+	void Index::serialize(const string& filepath) const {
+		path absolute_path = absolute(path(filepath));
+		
+		ofstream ofs(absolute_path, ios::binary);
 
 		if (!ofs.is_open()) {
-			throw runtime_error("Cannot open file " + path);
+			throw runtime_error("Cannot open file " + absolute_path.string());
 		}
-		uint32_t set_size = indexed_files.size();
-		ofs.write(reinterpret_cast<const char*>(&set_size), sizeof(set_size));
-		for(const auto& el : indexed_files){
-			string string_path = el.string();
+		uint32_t files_size = id_to_file.size();
+		ofs.write(reinterpret_cast<const char*>(&files_size), sizeof(files_size));
+		for(const auto& [id, filepath] : id_to_file){
+			ofs.write(reinterpret_cast<const char*>(&id), sizeof(id));
+
+			string string_path = filepath.string();
 			uint32_t path_size = string_path.length();
 			ofs.write(reinterpret_cast<const char*>(&path_size), sizeof(path_size));
 			ofs.write(string_path.data(), path_size);
@@ -107,11 +129,7 @@ namespace igrep::indexer {
 			ofs.write(reinterpret_cast<const char*>(&vector_size), sizeof(vector_size));
 
 			for (const Position& position : pair.second) {
-
-				uint32_t filename_length = position.filename.length();
-				ofs.write(reinterpret_cast<const char*>(&filename_length), sizeof(filename_length));
-				ofs.write(position.filename.data(), filename_length);
-
+				ofs.write(reinterpret_cast<const char*>(&position.file_id), sizeof(position.file_id));
 				ofs.write(reinterpret_cast<const char*>(&position.word_index), sizeof(position.word_index));
 				ofs.write(reinterpret_cast<const char*>(&position.indent), sizeof(position.indent));
 				ofs.write(reinterpret_cast<const char*>(&position.line_number), sizeof(position.line_number));
@@ -120,24 +138,31 @@ namespace igrep::indexer {
 		ofs.close();
 	}
 
-	void Index::deserialize(const string& path) {
+	void Index::deserialize(const string& filepath) {
 		try {
-			ifstream ifs(path, ios::binary);
-			if (!ifs.is_open()) {
-				throw runtime_error("Cannot open index file" + path);
-			}
-			uint32_t set_size;
-			ifs.read(reinterpret_cast<char*>(&set_size), sizeof(set_size));
+			path absolute_path = absolute(path(filepath));
 
-			for (int i = 0; i < set_size; i++){
+			ifstream ifs(absolute_path, ios::binary);
+			if (!ifs.is_open()) {
+				throw runtime_error("Cannot open index file" + absolute_path.string());
+			}
+			uint32_t files_size;
+			ifs.read(reinterpret_cast<char*>(&files_size), sizeof(files_size));
+
+			for (int i = 0; i < files_size; i++){
+				uint32_t file_id;
+				ifs.read(reinterpret_cast<char*>(&file_id), sizeof(file_id));
+
 				uint32_t path_size;
 				ifs.read(reinterpret_cast<char*>(&path_size), sizeof(path_size));
+
 				string file_string;
 				file_string.resize(path_size);
 				ifs.read(file_string.data(), path_size);
 				
 				filesystem::path filepath = file_string;
-				indexed_files.insert(filepath);
+				file_to_id[filepath] = file_id;
+				id_to_file[file_id] = filepath;
 			}
 
 
@@ -160,22 +185,19 @@ namespace igrep::indexer {
 				positions.reserve(vector_size);
 
 				for (int j = 0; j < vector_size; j++) {
-					uint32_t filename_len;
-					ifs.read(reinterpret_cast<char*>(&filename_len), sizeof(filename_len));
 
-					string filename;
-					filename.resize(filename_len);
-					ifs.read(filename.data(), filename_len);
-
+					uint32_t file_id;
 					uint32_t indent;
 					uint32_t line_number;
 					uint32_t word_index;
-
+					
+					ifs.read(reinterpret_cast<char*>(&file_id), sizeof(line_number));
 					ifs.read(reinterpret_cast<char*>(&word_index), sizeof(word_index));
 					ifs.read(reinterpret_cast<char*>(&indent), sizeof(indent));
 					ifs.read(reinterpret_cast<char*>(&line_number), sizeof(line_number));
+					
 
-					positions.emplace_back(move(filename), line_number, indent, word_index);
+					positions.emplace_back(file_id, line_number, indent, word_index);
 
 				}
 				words[move(key)] = move(positions);

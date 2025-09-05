@@ -18,20 +18,24 @@ namespace igrep::indexer {
 		void serialize(const std::string& path) const;
 		void deserialize(const std::string& path);
 
-		void process_line(const std::string& line, const std::string& filename, const uint32_t& line_number, uint32_t& word_index);
+		void process_line(const std::string& line, const std::filesystem::path& filepath, const uint32_t& line_number, uint32_t& word_index);
 		bool remove_file(const std::filesystem::path& filepath);
 		bool is_file_indexed(const std::filesystem::path& filepath) const;
+
 		const std::vector<Position>& get_positions(const std::string& word) const;
+		std::filesystem::path get_path_by_id(const uint32_t file_id) const;
 
 		bool operator==(const Index& other) const{
 			return words == other.words &&
-				   indexed_files == other.indexed_files;
+				   file_to_id == other.file_to_id;
 		}
 
 
 	private:
 		std::unordered_map<std::string, std::vector<Position>> words;
-		std::unordered_set<std::filesystem::path> indexed_files;
+		std::unordered_map<uint32_t, std::filesystem::path> id_to_file;
+		std::unordered_map<std::filesystem::path, uint32_t> file_to_id;
+
 		
 		
 	};
