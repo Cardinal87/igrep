@@ -106,33 +106,34 @@ namespace igrep::indexer {
 			throw runtime_error("Cannot open file " + absolute_path.string());
 		}
 		uint32_t files_size = id_to_file.size();
-		ofs.write(reinterpret_cast<const char*>(&files_size), sizeof(files_size));
+		write_varint(ofs, files_size);
 		for(const auto& [id, filepath] : id_to_file){
-			ofs.write(reinterpret_cast<const char*>(&id), sizeof(id));
+			write_varint(ofs, id);
+
 
 			string string_path = filepath.string();
 			uint32_t path_size = string_path.length();
-			ofs.write(reinterpret_cast<const char*>(&path_size), sizeof(path_size));
+			write_varint(ofs, path_size);
 			ofs.write(string_path.data(), path_size);
 		}
 
 		uint32_t map_size = words.size();
-		ofs.write(reinterpret_cast<char*>(&map_size), sizeof(map_size));
+		write_varint(ofs, map_size);
 
 		for (const auto& pair : words) {
 
 			uint32_t key_length = pair.first.length();
-			ofs.write(reinterpret_cast<const char*>(&key_length), sizeof(key_length));
+			write_varint(ofs, key_length);
 			ofs.write(pair.first.data(), key_length);
 
 			uint32_t vector_size = pair.second.size();
-			ofs.write(reinterpret_cast<const char*>(&vector_size), sizeof(vector_size));
+			write_varint(ofs, vector_size);
 
 			for (const Position& position : pair.second) {
-				ofs.write(reinterpret_cast<const char*>(&position.file_id), sizeof(position.file_id));
-				ofs.write(reinterpret_cast<const char*>(&position.word_index), sizeof(position.word_index));
-				ofs.write(reinterpret_cast<const char*>(&position.indent), sizeof(position.indent));
-				ofs.write(reinterpret_cast<const char*>(&position.line_number), sizeof(position.line_number));
+				write_varint(ofs, position.file_id);
+				write_varint(ofs, position.indent);
+				write_varint(ofs, position.line_number);
+				write_varint(ofs, position.word_index);
 			}
 		}
 		ofs.close();
@@ -146,15 +147,12 @@ namespace igrep::indexer {
 			if (!ifs.is_open()) {
 				throw runtime_error("Cannot open index file" + absolute_path.string());
 			}
-			uint32_t files_size;
-			ifs.read(reinterpret_cast<char*>(&files_size), sizeof(files_size));
+			uint32_t files_size = read_varint(ifs);
 
 			for (int i = 0; i < files_size; i++){
-				uint32_t file_id;
-				ifs.read(reinterpret_cast<char*>(&file_id), sizeof(file_id));
+				uint32_t file_id = read_varint(ifs);
 
-				uint32_t path_size;
-				ifs.read(reinterpret_cast<char*>(&path_size), sizeof(path_size));
+				uint32_t path_size = read_varint(ifs);
 
 				string file_string;
 				file_string.resize(path_size);
@@ -167,34 +165,26 @@ namespace igrep::indexer {
 
 
 
-			uint32_t map_size;
-			ifs.read(reinterpret_cast<char*>(&map_size), sizeof(map_size));
+			uint32_t map_size = read_varint(ifs);
 
 			for (int i = 0; i < map_size; i++) {
-				uint32_t key_len;
-				ifs.read(reinterpret_cast<char*>(&key_len), sizeof(key_len));
+				uint32_t key_len = read_varint(ifs);
 
 				string key;
 				key.resize(key_len);
 				ifs.read(key.data(), key_len);
 
-				uint32_t vector_size;
-				ifs.read(reinterpret_cast<char*>(&vector_size), sizeof(vector_size));
+				uint32_t vector_size = read_varint(ifs);
 
 				vector<Position> positions;
 				positions.reserve(vector_size);
 
 				for (int j = 0; j < vector_size; j++) {
 
-					uint32_t file_id;
-					uint32_t indent;
-					uint32_t line_number;
-					uint32_t word_index;
-					
-					ifs.read(reinterpret_cast<char*>(&file_id), sizeof(line_number));
-					ifs.read(reinterpret_cast<char*>(&word_index), sizeof(word_index));
-					ifs.read(reinterpret_cast<char*>(&indent), sizeof(indent));
-					ifs.read(reinterpret_cast<char*>(&line_number), sizeof(line_number));
+					uint32_t file_id = read_varint(ifs);
+					uint32_t indent = read_varint(ifs);
+					uint32_t line_number = read_varint(ifs);
+					uint32_t word_index = read_varint(ifs);
 					
 
 					positions.emplace_back(file_id, line_number, indent, word_index);
@@ -216,7 +206,28 @@ namespace igrep::indexer {
 		}
 	}
 
-
+	void Index::write_varint(ofstream& ofs, uint32_t value) const{
+		while(value >= 0x80){
+			char ch = value | 0x80;
+			ofs.write(&ch, 1);
+			value >>= 7;	
+		}
+		ofs.write(reinterpret_cast<char*>(&value), 1);
+	}
 	
+	uint32_t Index::read_varint(ifstream& ifs) const {
+		unsigned char buffer;
+		ifs.read(reinterpret_cast<char*>(&buffer), 1);
+		uint32_t value = static_cast<uint32_t>(buffer & 0x7F);
+		uint8_t shift = 7;
+
+		while(buffer & 0x80 && shift < 32){
+			ifs.read(reinterpret_cast<char*>(&buffer), 1);
+			value |= (static_cast<uint32_t>(buffer & 0x7F) << shift);
+			shift += 7;
+		}
+
+		return value;
+	}
 
 }

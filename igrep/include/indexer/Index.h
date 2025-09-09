@@ -35,7 +35,10 @@ namespace igrep::indexer {
 		std::unordered_map<std::string, std::vector<Position>> words;
 		std::unordered_map<uint32_t, std::filesystem::path> id_to_file;
 		std::unordered_map<std::filesystem::path, uint32_t> file_to_id;
+		
 
+		void write_varint(std::ofstream& ofs, uint32_t value) const;
+		uint32_t read_varint(std::ifstream& ifs) const;
 		
 		
 	};
