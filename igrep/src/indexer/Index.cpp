@@ -8,6 +8,7 @@
 #include<ios>
 #include<unordered_set>
 #include<cstdint>
+#include<algorithm>
 
 using namespace std;
 using namespace std::filesystem;
@@ -26,11 +27,11 @@ namespace igrep::indexer {
 		path absolute_path = weakly_canonical(absolute(path(filename)));
 		
 		uint32_t file_id;
-		if (file_to_id.contains(filename)){
+		if (file_to_id.contains(absolute_path)){
 			file_id = file_to_id[absolute_path];
 		}
 		else{
-			file_id = StringUtils::get_file_hash(filename);
+			file_id = StringUtils::get_file_hash(absolute_path);
 			file_to_id[absolute_path] = file_id;
 			id_to_file[file_id] = absolute_path;
 		}
@@ -61,13 +62,18 @@ namespace igrep::indexer {
 
 		for(auto it = words.begin(); it != words.end(); ){
 			
-			for(int i = 0; i < (it->second).size(); i++){
-				if ((it->second)[i].file_id == file_id){
-					(it->second).erase((it->second).begin() + i);
-					i--;
-				}
-			}
-			if ((it->second).empty()){
+			auto& positions = it->second;
+			positions.erase(
+				std::remove_if(
+					positions.begin(),
+					positions.end(),
+					[file_id](const Position& pos) {
+						return pos.file_id == file_id;
+					}
+				),
+            	positions.end()
+        	);
+			if (positions.empty()){
 				it = words.erase(it);
 			} 
 			else {
@@ -140,6 +146,10 @@ namespace igrep::indexer {
 	}
 
 	void Index::deserialize(const string& filepath) {
+		words.clear();
+		file_to_id.clear();
+		id_to_file.clear();
+			
 		try {
 			path absolute_path = absolute(path(filepath));
 
@@ -149,7 +159,7 @@ namespace igrep::indexer {
 			}
 			uint32_t files_size = read_varint(ifs);
 
-			for (int i = 0; i < files_size; i++){
+			for (uint32_t i = 0; i < files_size; i++){
 				uint32_t file_id = read_varint(ifs);
 
 				uint32_t path_size = read_varint(ifs);
@@ -167,7 +177,7 @@ namespace igrep::indexer {
 
 			uint32_t map_size = read_varint(ifs);
 
-			for (int i = 0; i < map_size; i++) {
+			for (uint32_t i = 0; i < map_size; i++) {
 				uint32_t key_len = read_varint(ifs);
 
 				string key;
@@ -179,7 +189,7 @@ namespace igrep::indexer {
 				vector<Position> positions;
 				positions.reserve(vector_size);
 
-				for (int j = 0; j < vector_size; j++) {
+				for (uint32_t j = 0; j < vector_size; j++) {
 
 					uint32_t file_id = read_varint(ifs);
 					uint32_t indent = read_varint(ifs);
@@ -202,6 +212,8 @@ namespace igrep::indexer {
 		}
 		catch (const exception&) {
 			words.clear();
+			file_to_id.clear();
+			id_to_file.clear();
 			throw;
 		}
 	}

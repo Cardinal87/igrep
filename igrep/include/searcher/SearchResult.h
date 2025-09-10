@@ -7,9 +7,9 @@ namespace igrep::searcher
 {
    struct SearchResult
    {
-      const std::string result;
-      const std::string file_path;
-      const int line;
+      std::string result;
+      std::string file_path;
+      uint32_t line;
 
 
       bool operator==(const SearchResult& other) const{

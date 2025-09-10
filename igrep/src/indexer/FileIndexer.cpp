@@ -26,14 +26,13 @@ namespace igrep::indexer {
 			throw runtime_error(format("file {} extenstion is not supported", file_path.filename().string()));
 		}
 
-		ifstream ifs;
-		ifs.open(file_path);
+		ifstream ifs(file_path);
 		uint32_t word_index = 1;
 		if (ifs.is_open()) {
 			string line;
 			uint32_t line_number = 1;
 			while (getline(ifs, line)) {
-				_index.process_line(line, file_path.string(), line_number++, word_index);
+				_index.process_line(line, file_path, line_number++, word_index);
 			}
 		}
 		else {

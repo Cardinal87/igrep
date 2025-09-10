@@ -11,6 +11,7 @@
 #include<format>
 #include<cstdint>
 #include<filesystem>
+#include<stdexcept>
 
 using namespace igrep::indexer;
 using namespace igrep::searcher;
@@ -25,7 +26,7 @@ namespace igrep::searcher{
         
     }
 
-    const vector<SearchResult> Searcher::search(const string& query) const{
+    vector<SearchResult> Searcher::search(const string& query) const{
         auto normalized_query = StringUtils::normalize_line(query);
         if (normalized_query.empty()) return {};
 
@@ -34,13 +35,13 @@ namespace igrep::searcher{
         string word;
         iss >> word;
         vector<SearchChain> result;
-        for(auto& position : index_.get_positions(word)){
+        for(const auto& position : index_.get_positions(word)){
             result.emplace_back(position, position);
         }
         
  
         while(iss >> word){
-            auto positions = index_.get_positions(word);
+            const auto& positions = index_.get_positions(word);
             get_intersections(result, positions);
             if(result.size() == 0){
                 return {};
@@ -51,23 +52,26 @@ namespace igrep::searcher{
     }
 
     void Searcher::get_intersections(vector<SearchChain>& chain_vector, const vector<Position>& positions) const{
+        vector<SearchChain> new_chains;
         for(auto& chain: chain_vector){
-            for(const auto position: positions){
+            for(const auto& position: positions){
                 if(chain.end.file_id != position.file_id) continue;
 
                 if(position.word_index == chain.end.word_index + 1){
-                    chain.end = position;
+                    new_chains.emplace_back(chain.start, position);
                     break;
                 }
 
             }
         }
 
+        chain_vector = move(new_chains);
     }
     
 
-    const vector<SearchResult> Searcher::map_result(const vector<SearchChain>& chains) const{
+    vector<SearchResult> Searcher::map_result(const vector<SearchChain>& chains) const{
         vector<SearchResult> result;
+        result.reserve(chains.size());
 
         for (const auto& chain: chains){
             string context = get_context(chain);
@@ -79,7 +83,7 @@ namespace igrep::searcher{
     }
 
 
-    const string Searcher::get_context(const SearchChain& chain) const{
+    string Searcher::get_context(const SearchChain& chain) const{
         path filepath = index_.get_path_by_id(chain.start.file_id);
         ifstream ifs(filepath);
         if (!ifs.is_open()){
@@ -89,7 +93,6 @@ namespace igrep::searcher{
 
         string current_line;
         uint32_t current_line_number = 1;
-        bool read = false;
         while(getline(ifs, current_line)){
             if (current_line_number >= chain.start.line_number && current_line_number <= chain.end.line_number) {
             context += current_line + '\n';

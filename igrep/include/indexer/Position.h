@@ -12,7 +12,7 @@ namespace igrep::indexer {
 		uint32_t word_index;
 
 		bool operator==(const Position& other) const{
-			return file_id == file_id &&
+			return file_id == other.file_id &&
 				   line_number == other.line_number &&
 				   indent == other.indent &&
 				   word_index == other.word_index; 
