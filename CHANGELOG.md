@@ -15,3 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Update `--help` flag output according to new options and flags
+
+## [1.2.0] - 2025-09-11
+### Changed
+- **Index format**: Optimized memory and disk usage by approximately 50%.
+  - File paths are now stored in a dictionary structure, mapped to unique numerical IDs.
+  - All numerical values are encoding using VarInt encoding
