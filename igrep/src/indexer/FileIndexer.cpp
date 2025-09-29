@@ -22,7 +22,7 @@ namespace igrep::indexer {
 			return false;
 		}
 		
-		if (!Index::extenstions.contains(file_path.extension().string())){
+		if (!Index::extensions.contains(file_path.extension().string())){
 			throw runtime_error(format("file {} extenstion is not supported", file_path.filename().string()));
 		}
 
@@ -55,7 +55,7 @@ namespace igrep::indexer {
 		}
 		for (const auto& entry : recursive_directory_iterator(dir_path)) {
 
-			if (is_regular_file(entry.path()) && Index::extenstions.contains(entry.path().extension().string())) {
+			if (is_regular_file(entry.path()) && Index::extensions.contains(entry.path().extension().string())) {
 				index_file(entry.path());
 			}
 		}

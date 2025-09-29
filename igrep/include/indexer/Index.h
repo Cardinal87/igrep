@@ -12,7 +12,7 @@ namespace igrep::indexer {
 	
 	class Index {
 	public:
-		static inline const std::unordered_set<std::string> extenstions = {".txt", ".log", ".json", ".csv", ".ini"};
+		static inline const std::unordered_set<std::string> extensions = {".txt", ".log", ".json", ".csv", ".ini"};
 		Index() = default;
 
 		void serialize(const std::string& path) const;
