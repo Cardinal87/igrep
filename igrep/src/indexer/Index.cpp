@@ -13,6 +13,7 @@
 using namespace std;
 using namespace std::filesystem;
 using namespace igrep::utils;
+using namespace igrep::indexer::common;
 
 
 namespace igrep::indexer {

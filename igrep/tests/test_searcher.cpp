@@ -1,6 +1,6 @@
 #include<gtest/gtest.h>
 #include"indexer/FileIndexer.h"
-#include"indexer/Position.h"
+#include"indexer/common/Position.h"
 #include"indexer/Index.h"
 #include"searcher/Searcher.h"
 #include"searcher/SearchResult.h"

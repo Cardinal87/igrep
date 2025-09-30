@@ -1,6 +1,6 @@
 #pragma once
 
-#include"Position.h"
+#include"common/Position.h"
 #include<string>
 #include<unordered_map>
 #include<vector>
@@ -22,7 +22,7 @@ namespace igrep::indexer {
 		bool remove_file(const std::filesystem::path& filepath);
 		bool is_file_indexed(const std::filesystem::path& filepath) const;
 
-		const std::vector<Position>& get_positions(const std::string& word) const;
+		const std::vector<common::Position>& get_positions(const std::string& word) const;
 		std::filesystem::path get_path_by_id(const uint32_t file_id) const;
 
 		bool operator==(const Index& other) const{
@@ -32,7 +32,7 @@ namespace igrep::indexer {
 
 
 	private:
-		std::unordered_map<std::string, std::vector<Position>> words;
+		std::unordered_map<std::string, std::vector<common::Position>> words;
 		std::unordered_map<uint32_t, std::filesystem::path> id_to_file;
 		std::unordered_map<std::filesystem::path, uint32_t> file_to_id;
 		

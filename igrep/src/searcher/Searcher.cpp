@@ -14,6 +14,7 @@
 #include<stdexcept>
 
 using namespace igrep::indexer;
+using namespace igrep::indexer::common;
 using namespace igrep::searcher;
 using namespace igrep::utils;
 using namespace std::filesystem;

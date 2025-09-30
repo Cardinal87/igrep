@@ -1,6 +1,6 @@
 #include<gtest/gtest.h>
 #include"indexer/Index.h"
-#include"indexer/Position.h"
+#include"indexer/common/Position.h"
 #include"utils/StringUtils.h"
 #include<filesystem>
 #include<fstream>
@@ -12,6 +12,7 @@ using namespace std;
 using namespace std::filesystem;
 using namespace igrep::indexer;
 using namespace igrep::utils;
+using namespace igrep::indexer::common;
 
 TEST(IndexTest, ProcessLine_GetPositions_Success){
     Index index;

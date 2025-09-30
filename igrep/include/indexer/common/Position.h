@@ -2,7 +2,7 @@
 
 #include<string>
 #include<cstdint>
-namespace igrep::indexer {
+namespace igrep::indexer::common {
 
 	struct Position
 	{
