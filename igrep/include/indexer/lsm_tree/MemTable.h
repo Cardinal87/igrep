@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/Position.h"
+#include "indexer/common/Position.h"
 #include<unordered_map>
 #include<string>
 #include<cstdint>
@@ -22,10 +22,7 @@ namespace igrep::indexer::lsm_tree{
         private:
             static inline const std::uint32_t maxSize = 50 * 1024 * 1024;
 
-            std::unordered_map<std::string, std::vector<igrep::indexer::common::Position>> id_to_positions;
-
-            void clear();
-            
+            std::unordered_map<std::string, std::vector<igrep::indexer::common::Position>> words;
 
     };
 }
