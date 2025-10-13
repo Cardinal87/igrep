@@ -10,7 +10,15 @@ namespace igrep::indexer::lsm_tree{
     }
 
     bool MemTable::is_full() const{
-        return words.size() >= maxSize;
+        size_t map_object_size = sizeof(words);
+        size_t element_size = 0;
+        if (!words.empty()) {
+            element_size = sizeof(words.begin()->first) + sizeof(words.begin()->second);
+        }
+
+        size_t total_size = map_object_size + (words.size() * element_size);
+        
+        return total_size >= maxSize;
     }
 
     vector<pair<string, vector<Position>>> MemTable::flush_to_sstable(){
@@ -18,8 +26,8 @@ namespace igrep::indexer::lsm_tree{
         sorted.reserve(words.size());
 
         for(auto it = words.begin(); it != words.end(); ) {
-        sorted.emplace_back(std::move(it->first), std::move(it->second));
-        it = words.erase(it);  
+            sorted.emplace_back(std::move(it->first), std::move(it->second));
+            it = words.erase(it);  
         }
 
         sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b)
