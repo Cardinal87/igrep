@@ -1,7 +1,7 @@
 #pragma once
 
 #include<vector>
-#include "common/Position.h"
+#include "indexer/common/Position.h"
 #include "SSTableMeta.h"
 #include<string>
 #include<filesystem> 
@@ -16,10 +16,11 @@ namespace igrep::indexer::lsm_tree
             ~SSTableManager() = default;
             explicit SSTableManager(std::filesystem::path working_dir);
 
-            void write(const std::vector<std::pair<std::string, std::vector<igrep::indexer::common::Position>>>& positions);
+            void write(const std::vector<std::pair<std::string, std::vector<igrep::indexer::common::Position>>>& sorted_positions);
             std::vector<igrep::indexer::common::Position> find_word(const std::string& word) const;
 
-            std::vector<igrep::indexer::lsm_tree::SSTableMeta> get_metadata() const;
+            void save_metadata() const;
+            std::vector<SSTableMeta> get_metadata() const {return _sstables_metadata;};
 
         private:
             const std::filesystem::path _working_dir;
@@ -29,6 +30,8 @@ namespace igrep::indexer::lsm_tree
 		    uint32_t read_varint(std::ifstream& ifs) const;
 
             void load_metadata();
+
+            
 
     };
 } // namespace igrep::indexer::lsm_tree
