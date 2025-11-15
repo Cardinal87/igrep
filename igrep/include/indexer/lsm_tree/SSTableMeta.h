@@ -6,6 +6,7 @@
 namespace igrep::indexer::lsm_tree
 {
     struct SSTableMeta{
+        std::uint8_t level;
         std::uint32_t sstable_id;
         std::string first_word;
         std::string last_word;

@@ -32,26 +32,34 @@ namespace igrep::indexer::lsm_tree{
         }
         
         try{
-            uint32_t meta_size = read_varint(ifs);
 
-            for(uint32_t i = 0; i < meta_size; i++){
-                uint32_t table_id = read_varint(ifs);
+            uint32_t levels_size = read_varint(ifs);
+            _levels.resize(levels_size);
+            
+            for (uint8_t l = 0; l < levels_size; l++){
+                uint32_t meta_size = read_varint(ifs);
 
-                uint32_t first_word_size =  read_varint(ifs);
-                string first_word;
-                first_word.reserve(first_word_size);
-                ifs.read(first_word.data(), first_word_size);
+                for(uint32_t i = 0; i < meta_size; i++){
+                    uint8_t level = static_cast<uint8_t>(read_varint(ifs));
 
-                uint32_t last_word_size =  read_varint(ifs);
-                string last_word;
-                last_word.reserve(last_word_size);  
-                ifs.read(last_word.data(), last_word_size);
+                    uint32_t table_id = read_varint(ifs);
 
-                _sstables_metadata.emplace_back(table_id, first_word, last_word);
+                    uint32_t first_word_size =  read_varint(ifs);
+                    string first_word;
+                    first_word.reserve(first_word_size);
+                    ifs.read(first_word.data(), first_word_size);
+
+                    uint32_t last_word_size =  read_varint(ifs);
+                    string last_word;
+                    last_word.reserve(last_word_size);  
+                    ifs.read(last_word.data(), last_word_size);
+
+                    _levels[level].emplace_back(level, table_id, first_word, last_word);
+                }
             }
         }
         catch(exception& ex){
-            _sstables_metadata.clear();
+            _levels.clear();
             ifs.close();
             throw;
         }
@@ -70,16 +78,20 @@ namespace igrep::indexer::lsm_tree{
 
         try{
 
-            write_varint(ofs, _sstables_metadata.size());
+            write_varint(ofs, _levels.size());
 
-            for(const auto& meta_object: _sstables_metadata){
-                write_varint(ofs, meta_object.sstable_id);
+            for(const auto& level: _levels){
+                write_varint(ofs, level.size());
+                for(const auto& meta_object: level){
+                    write_varint(ofs, meta_object.level);
+                    write_varint(ofs, meta_object.sstable_id);
 
-                write_varint(ofs, meta_object.first_word.length());
-                ofs.write(meta_object.first_word.data(), meta_object.first_word.length());
+                    write_varint(ofs, meta_object.first_word.length());
+                    ofs.write(meta_object.first_word.data(), meta_object.first_word.length());
 
-                write_varint(ofs, meta_object.last_word.length());
-                ofs.write(meta_object.last_word.data(), meta_object.last_word.length());
+                    write_varint(ofs, meta_object.last_word.length());
+                    ofs.write(meta_object.last_word.data(), meta_object.last_word.length());
+                }
             }
         }
         catch(exception& ex){
@@ -93,69 +105,65 @@ namespace igrep::indexer::lsm_tree{
     vector<Position> SSTableManager::find_word(const string& word) const {
         
         vector<Position> result;
-        for(const auto& meta : _sstables_metadata){
-            bool after_start = !lexicographical_compare(word.begin(), word.end(),
-                                                        meta.first_word.begin(), meta.first_word.end());
+        for(const auto& level: _levels){
 
+            for(const auto& meta : level){
+                bool after_start = (word >= meta.first_word);
+                bool before_end = (word <= meta.last_word);                          
+                
+                if(after_start && before_end){
+                    path table_path = _working_dir / (to_string(meta.sstable_id) + ".sstable");
+                    path index_path = _working_dir / (to_string(meta.sstable_id) + ".idx");
+                    ifstream idx(index_path, ios::binary);
+                    if(!idx.is_open()){
+                        throw runtime_error("failed to open file" + table_path.string());
+                    }
+                    uint64_t offset;
+                    bool is_found = false;
+                    uint32_t word_amount = read_varint(idx);
+                    for(int i = 0; i < word_amount; i++){
+                        offset = read_varint(idx);
 
-            bool before_end = !lexicographical_compare(meta.last_word.begin(), meta.last_word.end(),
-                                                      word.begin(), word.end());                            
-            
-            if(after_start && before_end){
-                path table_path = _working_dir / (to_string(meta.sstable_id) + ".sstable");
-                path index_path = _working_dir / (to_string(meta.sstable_id) + ".idx");
-                ifstream idx(index_path, ios::binary);
-                if(!idx.is_open()){
-                    throw runtime_error("failed to open file" + table_path.string());
-                }
-                uint64_t offset;
-                bool is_found = false;
-                uint32_t word_amount = read_varint(idx);
-                for(int i = 0; i < word_amount; i++){
-                    offset = read_varint(idx);
+                        uint32_t key_len = read_varint(idx);
+                        string key;
+                        key.reserve(key_len);
+                        idx.read(key.data(), key_len);
+                        if(word == key){
+                            is_found = true;
+                            break;
+                        }
 
-                    uint32_t key_len = read_varint(idx);
-                    string key;
-                    key.reserve(key_len);
-                    idx.read(key.data(), key_len);
-                    if(word == key){
-                        is_found = true;
-                        break;
+                    }
+                    idx.close();
+                    if(!is_found){
+                        continue;
                     }
 
-                }
-                idx.close();
-                if(!is_found){
-                    return {};
-                }
 
+                    ifstream ifs(table_path, ios::binary);
+                    if(!ifs.is_open()){
+                        throw runtime_error("failed to open file" + table_path.string());
+                    }
+                    
 
-                ifstream ifs(table_path, ios::binary);
-                if(!ifs.is_open()){
-                    throw runtime_error("failed to open file" + table_path.string());
-                }
-                
+                    ifs.seekg(offset);
+                    uint32_t vector_size = read_varint(ifs);
 
-                ifs.seekg(offset);
-                uint32_t vector_size = read_varint(ifs);
+                    for(int i = 0; i < vector_size; i++){
+                        uint32_t file_id = read_varint(ifs);
+                        uint32_t line_number = read_varint(ifs);
+                        uint32_t indent = read_varint(ifs);
+                        uint32_t word_index = read_varint(ifs);
 
-                vector<Position> positions;
-                positions.reserve(vector_size);
-                for(int i = 0; i < vector_size; i++){
-                    uint32_t file_id = read_varint(ifs);
-                    uint32_t line_number = read_varint(ifs);
-                    uint32_t indent = read_varint(ifs);
-                    uint32_t word_index = read_varint(ifs);
-
-                    positions.emplace_back(file_id, line_number, indent, word_index);
+                        result.emplace_back(file_id, line_number, indent, word_index);
+                    } 
+                    ifs.close();
+                    
                 } 
-                ifs.close();
-                return positions;
                 
-            } 
-            return {};
+            }
         }
-        return {};
+        return result;
     }
 
     void SSTableManager::write(const vector<pair<string,vector<Position>>>& sorted_positions){
@@ -209,7 +217,7 @@ namespace igrep::indexer::lsm_tree{
         ofs.close();
         idx.close();
         
-        _sstables_metadata.emplace_back(table_id, sorted_positions.front().first, sorted_positions.back().first);
+        _levels[0].emplace_back(0, table_id, sorted_positions.front().first, sorted_positions.back().first);
     }
 
 

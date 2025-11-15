@@ -20,11 +20,11 @@ namespace igrep::indexer::lsm_tree
             std::vector<igrep::indexer::common::Position> find_word(const std::string& word) const;
 
             void save_metadata() const;
-            std::vector<SSTableMeta> get_metadata() const {return _sstables_metadata;};
+            std::vector<std::vector<SSTableMeta>> get_metadata() const {return _levels;};
 
         private:
             const std::filesystem::path _working_dir;
-            std::vector<igrep::indexer::lsm_tree::SSTableMeta> _sstables_metadata;
+            std::vector<std::vector<SSTableMeta>> _levels;
 
             void write_varint(std::ofstream& ofs, uint32_t value) const;
 		    uint32_t read_varint(std::ifstream& ifs) const;
