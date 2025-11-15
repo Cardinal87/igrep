@@ -13,9 +13,7 @@ using namespace igrep::indexer::lsm_tree;
 using namespace igrep::indexer::common;
 
 namespace igrep::indexer::lsm_tree{
-    SSTableManager::SSTableManager(path working_dir): _working_dir(working_dir){
-        load_metadata();
-    }
+    SSTableManager::SSTableManager(path working_dir): _working_dir(working_dir){}
 
 
     void SSTableManager::load_metadata(){
@@ -45,13 +43,11 @@ namespace igrep::indexer::lsm_tree{
                     uint32_t table_id = read_varint(ifs);
 
                     uint32_t first_word_size =  read_varint(ifs);
-                    string first_word;
-                    first_word.reserve(first_word_size);
+                    string first_word(first_word_size, '\0');
                     ifs.read(first_word.data(), first_word_size);
 
                     uint32_t last_word_size =  read_varint(ifs);
-                    string last_word;
-                    last_word.reserve(last_word_size);  
+                    string last_word(last_word_size, '\0');
                     ifs.read(last_word.data(), last_word_size);
 
                     _levels[level].emplace_back(level, table_id, first_word, last_word);
@@ -125,8 +121,7 @@ namespace igrep::indexer::lsm_tree{
                         offset = read_varint(idx);
 
                         uint32_t key_len = read_varint(idx);
-                        string key;
-                        key.reserve(key_len);
+                        string key(key_len, '\0');
                         idx.read(key.data(), key_len);
                         if(word == key){
                             is_found = true;
@@ -217,6 +212,10 @@ namespace igrep::indexer::lsm_tree{
         ofs.close();
         idx.close();
         
+        if (_levels.empty()){
+            _levels.resize(1);
+        }
+
         _levels[0].emplace_back(0, table_id, sorted_positions.front().first, sorted_positions.back().first);
     }
 
