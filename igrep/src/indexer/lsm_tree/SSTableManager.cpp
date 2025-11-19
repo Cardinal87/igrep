@@ -153,6 +153,10 @@ namespace igrep::indexer::lsm_tree{
                         result.emplace_back(file_id, line_number, indent, word_index);
                     } 
                     ifs.close();
+
+                    if (meta.level > 0){
+                        break;
+                    }
                     
                 } 
                 

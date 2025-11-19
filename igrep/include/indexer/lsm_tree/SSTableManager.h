@@ -21,7 +21,7 @@ namespace igrep::indexer::lsm_tree
 
             void save_metadata() const;
             void load_metadata();
-            std::vector<std::vector<SSTableMeta>> get_metadata() const {return _levels;};
+            std::vector<std::vector<SSTableMeta>>& get_metadata() {return _levels;};
 
         private:
             const std::filesystem::path _working_dir;

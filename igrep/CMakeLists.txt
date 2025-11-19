@@ -52,6 +52,7 @@ add_executable(igrep_tests
   src/indexer/Index.cpp
   src/indexer/lsm_tree/MemTable.cpp
   src/indexer/lsm_tree/SSTableManager.cpp
+  src/indexer/lsm_tree/CompactionManager.cpp
   src/indexer/FileIndexer.cpp
   src/utils/StringUtils.cpp
   src/searcher/Searcher.cpp
