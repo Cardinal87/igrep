@@ -7,18 +7,11 @@ using namespace std;
 namespace igrep::indexer::lsm_tree{
     void MemTable::insert(const string& word, const Position& position){
         words[word].push_back(position);
+        current_count += 1;
     }
 
     bool MemTable::is_full() const{
-        size_t map_object_size = sizeof(words);
-        size_t element_size = 0;
-        if (!words.empty()) {
-            element_size = sizeof(words.begin()->first) + sizeof(words.begin()->second);
-        }
-
-        size_t total_size = map_object_size + (words.size() * element_size);
-        
-        return total_size >= maxSize;
+        return current_count >= MAX_COUNT;
     }
 
     vector<pair<string, vector<Position>>> MemTable::flush_to_sstable(){
@@ -34,6 +27,7 @@ namespace igrep::indexer::lsm_tree{
         {
             return a.first < b.first;
         });
+        current_count = 0;
         return sorted;
     }
 

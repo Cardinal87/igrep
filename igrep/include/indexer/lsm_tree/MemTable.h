@@ -20,7 +20,8 @@ namespace igrep::indexer::lsm_tree{
 
 
         private:
-            static inline const std::uint32_t maxSize = 50 * 1024 * 1024;
+            static inline const uint16_t MAX_COUNT = 10000;
+            uint16_t current_count = 0;
 
             std::unordered_map<std::string, std::vector<igrep::indexer::common::Position>> words;
 
