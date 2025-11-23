@@ -2,7 +2,7 @@
 # укажите здесь логику для конкретного проекта.
 #
 cmake_minimum_required (VERSION 3.10)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Включение горячей перезагрузки для компиляторов MSVC, если поддерживается.
 if (POLICY CMP0141)
@@ -18,7 +18,11 @@ add_executable (igrep
 "src/utils/StringUtils.cpp" 
 "src/indexer/Index.cpp"
 "src/searcher/Searcher.cpp" 
-"src/indexer/FileIndexer.cpp")
+"src/indexer/FileIndexer.cpp"
+src/indexer/lsm_tree/MemTable.cpp
+src/indexer/lsm_tree/SSTableManager.cpp
+src/indexer/lsm_tree/CompactionManager.cpp
+src/indexer/lsm_tree/SSTableIO.cpp)
 
 target_include_directories(igrep PRIVATE include)
 target_compile_definitions(igrep PRIVATE SOURCE_DIR="${CMAKE_SOURCE_DIR}")
@@ -53,6 +57,7 @@ add_executable(igrep_tests
   src/indexer/lsm_tree/MemTable.cpp
   src/indexer/lsm_tree/SSTableManager.cpp
   src/indexer/lsm_tree/CompactionManager.cpp
+  src/indexer/lsm_tree/SSTableIO.cpp
   src/indexer/FileIndexer.cpp
   src/utils/StringUtils.cpp
   src/searcher/Searcher.cpp

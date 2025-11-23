@@ -16,8 +16,8 @@ namespace igrep::indexer::lsm_tree
             ~SSTableManager() = default;
             explicit SSTableManager(std::filesystem::path working_dir);
 
-            void write(const std::vector<std::pair<std::string, std::vector<igrep::indexer::common::Position>>>& sorted_positions);
             std::vector<igrep::indexer::common::Position> find_word(const std::string& word) const;
+            void write(const std::vector<std::pair<std::string, std::vector<common::Position>>>& sorted_positions);
 
             void save_metadata() const;
             void load_metadata();
@@ -26,13 +26,6 @@ namespace igrep::indexer::lsm_tree
         private:
             const std::filesystem::path _working_dir;
             std::vector<std::vector<SSTableMeta>> _levels;
-
-            void write_varint(std::ofstream& ofs, uint32_t value) const;
-		    uint32_t read_varint(std::ifstream& ifs) const;
-
-            
-
-            
 
     };
 } // namespace igrep::indexer::lsm_tree
