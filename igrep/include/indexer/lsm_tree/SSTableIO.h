@@ -11,7 +11,7 @@ namespace igrep::indexer::lsm_tree{
     class SSTableIO{
 
         public:
-            static SSTableMeta write_table(const std::vector<std::pair<std::string, std::vector<igrep::indexer::common::Position>>>& sorted_positions, const std::filesystem::path& working_dir);
+            static SSTableMeta write_table(const std::vector<std::pair<std::string, std::vector<igrep::indexer::common::Position>>>& sorted_positions, const std::filesystem::path& working_dir, uint8_t level);
 
             static void write_varint(std::ofstream& ofs, uint64_t value);
 		    static uint64_t read_varint(std::ifstream& ifs);

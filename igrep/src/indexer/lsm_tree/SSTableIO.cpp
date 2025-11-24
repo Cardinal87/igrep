@@ -38,7 +38,7 @@ namespace igrep::indexer::lsm_tree
     }
 
 
-    SSTableMeta SSTableIO::write_table(const vector<pair<string,vector<Position>>>& sorted_positions, const path& working_dir ){
+    SSTableMeta SSTableIO::write_table(const vector<pair<string,vector<Position>>>& sorted_positions, const path& working_dir, uint8_t level ){
         random_device ran_dev;
         mt19937 generator(ran_dev());
         uniform_int_distribution<uint32_t> distrib;
@@ -89,6 +89,6 @@ namespace igrep::indexer::lsm_tree
         ofs.close();
         idx.close();
         
-        return SSTableMeta{0, table_id, sorted_positions.front().first, sorted_positions.back().first};
+        return SSTableMeta{level, table_id, sorted_positions.front().first, sorted_positions.back().first};
     }
 } // namespace igrep::indexer::lsm_tree

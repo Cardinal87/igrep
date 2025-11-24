@@ -167,7 +167,7 @@ namespace igrep::indexer::lsm_tree{
     }
 
     void SSTableManager::write(const vector<pair<string,vector<Position>>>& sorted_positions){
-        SSTableMeta table_meta = SSTableIO::write_table(sorted_positions, _working_dir);
+        SSTableMeta table_meta = SSTableIO::write_table(sorted_positions, _working_dir, 0);
 
         if (_levels.empty()){
             _levels.resize(1);
