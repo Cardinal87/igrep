@@ -26,6 +26,18 @@ namespace igrep::indexer::lsm_tree{
         
         vector<SSTableMeta> candidates = pick_candidates(level_for_compact, tables_meta);
 
+        uint8_t next_level = level_for_compact + 1;
+        vector<SSTableMeta> new_tables_meta = merge(candidates, level_for_compact + 1);
+
+        if (!new_tables_meta.empty()){
+            if (next_level >= tables_meta.size()) tables_meta.resize(next_level + 1);
+
+            remove_old_tables(new_tables_meta, tables_meta, level_for_compact);
+            tables_meta[next_level].insert(tables_meta[next_level].end(), new_tables_meta.begin(), new_tables_meta.end());
+            sort(tables_meta[next_level].begin(), tables_meta[next_level].end(), [](const SSTableMeta& a, const SSTableMeta& b) {
+                return a.first_word < b.first_word;
+            });
+        }
 
     }
 
@@ -82,10 +94,10 @@ namespace igrep::indexer::lsm_tree{
 
 
 
-    void CompactionManager::merge(const vector<SSTableMeta>& candidates, uint8_t write_level) const{
+    vector<SSTableMeta> CompactionManager::merge(const vector<SSTableMeta>& candidates, uint8_t write_level) const{
         
         if (candidates.empty()){
-            return;
+            return {};
         }
 
         struct TableStream{
@@ -95,6 +107,7 @@ namespace igrep::indexer::lsm_tree{
             string current_word;
             vector<Position> current_positions;
         };
+        vector<SSTableMeta> new_table_meta;
 
 
         auto comparator = [](const TableStream* a, const TableStream* b) {return a->current_word > b->current_word;};
@@ -144,7 +157,9 @@ namespace igrep::indexer::lsm_tree{
                 accumulated.clear();
 
                 if (current_count > MAX_CHUNK_COUNT) {
-                    SSTableIO::write_table(merged_chunk, _working_dir, write_level);
+                    SSTableMeta table_meta = SSTableIO::write_table(merged_chunk, _working_dir, write_level);
+                    new_table_meta.push_back(table_meta);
+
                     merged_chunk.clear();
                     current_count = 0;
                 }
@@ -166,6 +181,29 @@ namespace igrep::indexer::lsm_tree{
         if (!prev_word.empty() && !accumulated.empty()) {
             merged_chunk.emplace_back(std::move(prev_word), std::move(accumulated));
             SSTableIO::write_table(merged_chunk, _working_dir, write_level);
+        }
+
+        return new_table_meta;
+    }
+
+
+    void CompactionManager::remove_old_tables(const vector<SSTableMeta>& candidates, vector<vector<SSTableMeta>>& levels, uint8_t level) const{
+        for (const auto& meta: candidates){
+            path sstable_path = _working_dir / (to_string(meta.sstable_id) + ".sstable");
+            path index_path = _working_dir / (to_string(meta.sstable_id) + ".idx");
+            remove(sstable_path);
+            remove(index_path);
+        }
+
+        auto remove_old = [&](const SSTableMeta& m){
+            return find(candidates.begin(), candidates.end(), m) != candidates.end();
+        };
+
+        levels[level].erase(remove_if(levels[level].begin(), levels[level].end(), remove_old), levels[level].end());
+
+        uint8_t next_level = level + 1;
+        if (next_level < levels.size()){
+            levels[next_level].erase(remove_if(levels[next_level].begin(), levels[next_level].end(), remove_old), levels[next_level].end());
         }
 
 

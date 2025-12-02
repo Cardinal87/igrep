@@ -19,9 +19,10 @@ namespace igrep::indexer::lsm_tree
             int8_t pick_level_for_compact(std::vector<std::vector<SSTableMeta>>& levels) const;
             std::vector<SSTableMeta> pick_candidates(uint8_t level, const std::vector<std::vector<SSTableMeta>>& levels) const;
 
-            void merge(const std::vector<SSTableMeta>& candidates, uint8_t write_level) const;
+            std::vector<SSTableMeta> merge(const std::vector<SSTableMeta>& candidates, uint8_t write_level) const;
 
             bool read_next_word(std::ifstream& idx, std::ifstream& table, std::string& word, std::vector<common::Position>& positions) const;
+            void remove_old_tables(const std::vector<SSTableMeta>& candidates, std::vector<std::vector<SSTableMeta>>& levels, uint8_t level) const;
 
             const uint8_t MAX_L0_COUNT = 6; 
             const uint8_t FANOUT = 10;
