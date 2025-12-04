@@ -14,6 +14,10 @@ namespace igrep::indexer::lsm_tree{
         return current_count >= MAX_COUNT;
     }
 
+    bool MemTable::is_empty() const{
+        return current_count == 0;
+    }
+
     vector<pair<string, vector<Position>>> MemTable::flush_to_sstable(){
         vector<pair<string, vector<Position>>> sorted;
         sorted.reserve(words.size());

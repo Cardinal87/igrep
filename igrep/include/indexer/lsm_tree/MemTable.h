@@ -16,6 +16,7 @@ namespace igrep::indexer::lsm_tree{
             void insert(const std::string& word, const igrep::indexer::common::Position& position);
 
             bool is_full() const;
+            bool is_empty() const;
             std::vector<std::pair<std::string, std::vector<igrep::indexer::common::Position>>> flush_to_sstable();
 
 

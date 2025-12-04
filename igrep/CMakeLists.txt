@@ -22,6 +22,7 @@ add_executable (igrep
 src/indexer/lsm_tree/MemTable.cpp
 src/indexer/lsm_tree/SSTableManager.cpp
 src/indexer/lsm_tree/CompactionManager.cpp
+src/indexer/lsm_tree/LSMIndex.cpp
 src/indexer/lsm_tree/SSTableIO.cpp)
 
 target_include_directories(igrep PRIVATE include)
