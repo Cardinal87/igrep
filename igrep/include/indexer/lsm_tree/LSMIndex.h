@@ -19,7 +19,7 @@ namespace igrep::indexer::lsm_tree{
             explicit LSMIndex(std::filesystem::path working_dir);
 
             void process_file(const std::filesystem::path& filepath);
-            void process_directory();
+            void process_directory(const std::filesystem::path& dirpath);
             void remove_file(const std::string& filepath);
 
             std::vector<igrep::indexer::common::Position> get_positions(std::string& query) const;

@@ -45,6 +45,26 @@ namespace igrep::indexer::lsm_tree{
         }
     }
 
+    void LSMIndex::process_directory(const path& dirpath){
+        if (!exists(dirpath)){
+			throw runtime_error(format("File or directory {} does not exists", dirpath.string()));
+		}
+        if (!is_directory(dirpath)){
+			throw runtime_error(format("{} is not directory", dirpath.string()));
+		}
+
+        for (const auto& entry : recursive_directory_iterator(dirpath)) {
+
+			if (is_regular_file(entry.path()) && _extensions.contains(entry.path().extension().string())) {
+				index_file(entry.path());
+			}
+		}
+
+        if (!_mem_table.is_empty()){
+            flush_memtable();
+        }
+    }
+
     bool LSMIndex::is_file_indexed(const path& filepath) const{
         path absolute_path = weakly_canonical(absolute(path(filepath)));
 		return file_to_id.contains(absolute_path);
