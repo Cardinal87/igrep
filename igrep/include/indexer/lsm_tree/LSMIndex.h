@@ -15,16 +15,16 @@
 namespace igrep::indexer::lsm_tree{
     class LSMIndex : public igrep::indexer::common::IndexBase{
         public:
-            ~LSMIndex() = default;
+            ~LSMIndex() override = default;
             explicit LSMIndex(std::filesystem::path working_dir);
 
-            void process_file(const std::filesystem::path& filepath);
-            void process_directory(const std::filesystem::path& dirpath);
-            void remove_file(const std::string& filepath);
+            void process_file(const std::filesystem::path& filepath) override;
+            void process_directory(const std::filesystem::path& dirpath) override;
+            void remove_file(const std::filesystem::path& filepath) override;
 
-            std::vector<igrep::indexer::common::Position> get_positions(std::string& query) const;
+            std::vector<igrep::indexer::common::Position> get_positions(std::string& query) const override;
 
-            bool is_file_indexed(const std::filesystem::path& filepath) const;
+            bool is_file_indexed(const std::filesystem::path& filepath) const override;
             std::filesystem::path get_path_by_id(const uint32_t& file_id) const;
 
             void flush_memtable();
@@ -40,7 +40,6 @@ namespace igrep::indexer::lsm_tree{
             void index_file(const std::filesystem::path& filename);
 
             static inline const std::string type = "lsm-tree";
-            static inline const std::unordered_set<std::string> _extensions = {".txt", ".log", ".json", ".csv", ".ini"};
             const std::filesystem::path _working_dir;
 
             std::unordered_map<uint32_t, std::filesystem::path> id_to_file;

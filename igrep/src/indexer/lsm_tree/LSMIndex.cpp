@@ -2,6 +2,7 @@
 #include"indexer/lsm_tree/SSTableManager.h"
 #include"indexer/lsm_tree/CompactionManager.h"
 #include"indexer/lsm_tree/MemTable.h"
+#include"indexer/common/IndexBase.h"
 #include"utils/StringUtils.h"
 #include"indexer/common/Position.h"
 
@@ -29,12 +30,13 @@ namespace igrep::indexer::lsm_tree{
         _table_manager(working_dir){};
 
 
+
     void LSMIndex::process_file(const path& filepath){
         if (is_file_indexed(filepath)){
             return;
         }
 
-        if (!_extensions.contains(filepath.extension().string())){
+        if (!extensions.contains(filepath.extension().string())){
 			throw runtime_error(format("file {} extenstion is not supported", filepath.filename().string()));
 		}
 
@@ -55,7 +57,7 @@ namespace igrep::indexer::lsm_tree{
 
         for (const auto& entry : recursive_directory_iterator(dirpath)) {
 
-			if (is_regular_file(entry.path()) && _extensions.contains(entry.path().extension().string())) {
+			if (is_regular_file(entry.path()) && extensions.contains(entry.path().extension().string())) {
 				index_file(entry.path());
 			}
 		}
@@ -63,6 +65,14 @@ namespace igrep::indexer::lsm_tree{
         if (!_mem_table.is_empty()){
             flush_memtable();
         }
+    }
+
+    void LSMIndex::remove_file(const path& filepath){
+        //not implemented yet
+    }
+
+    vector<Position> LSMIndex::get_positions(std::string& query) const{
+        throw runtime_error("not implemented yet");
     }
 
     bool LSMIndex::is_file_indexed(const path& filepath) const{
