@@ -19,11 +19,6 @@ namespace igrep::indexer::lsm_tree{
 
     void SSTableManager::load_metadata(){
         path meta_path = _working_dir / "tables.meta";
-
-         if (!exists(meta_path)) {
-            return; 
-        }
-
         ifstream ifs(meta_path, ios::binary);
 
         if (!ifs.is_open()){
@@ -54,13 +49,14 @@ namespace igrep::indexer::lsm_tree{
                     _levels[level].emplace_back(level, table_id, first_word, last_word);
                 }
             }
+
+            ifs.close();
         }
         catch(exception& ex){
             _levels.clear();
             ifs.close();
             throw;
         }
-        ifs.close();
         
     }
 
@@ -90,13 +86,14 @@ namespace igrep::indexer::lsm_tree{
                     ofs.write(meta_object.last_word.data(), meta_object.last_word.length());
                 }
             }
+
+            ofs.close();
         }
         catch(exception& ex){
             remove(meta_path);
             ofs.close();
             throw;
         }
-        ofs.close();
     }
 
     vector<Position> SSTableManager::find_word(const string& word) const {

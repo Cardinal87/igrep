@@ -5,7 +5,7 @@
 #include"indexer/common/IndexBase.h"
 #include"utils/StringUtils.h"
 #include"indexer/common/Position.h"
-
+#include"indexer/lsm_tree/SSTableIO.h"
 
 #include<string>
 #include<filesystem>
@@ -87,6 +87,15 @@ namespace igrep::indexer::lsm_tree{
         _compaction_manager.compact(metadata_link);
     }
 
+    path LSMIndex::get_path_by_id(const uint32_t& id) const{
+        const auto it = id_to_file.find(id);
+        if (it == id_to_file.end()){
+            return {};
+        }
+        return it -> second;
+    }
+
+
     void LSMIndex::index_line(string& line, const uint32_t& file_id, const uint32_t& line_number, uint32_t& word_index){
 		string lower_case_line = StringUtils::to_lower_case_copy(line);
 		string normalized =  StringUtils::normalize_line(line);
@@ -137,4 +146,76 @@ namespace igrep::indexer::lsm_tree{
 		ifs.close();
     }
 
+
+    void LSMIndex::serialize() const{
+        _table_manager.save_metadata();
+
+        path meta_file = _working_dir / "index.meta";
+        ofstream ofs(meta_file, ios::binary);
+
+        if (!ofs.is_open()){
+            throw runtime_error(format("Unable to open file {}", meta_file.string()));
+        }
+
+        uint8_t type_len = TYPE.size();
+        ofs.write(reinterpret_cast<char*>(type_len), sizeof(type_len));
+        ofs.write(TYPE.data(), type_len);
+
+        uint32_t map_size = file_to_id.size();
+        SSTableIO::write_varint(ofs, map_size);
+        
+        for(const auto& pair: file_to_id){
+            string filename = pair.first.string();
+            uint16_t filename_len = filename.size();
+            SSTableIO::write_varint(ofs, filename_len);
+            ofs.write(filename.data(), filename_len);
+
+            SSTableIO::write_varint(ofs, pair.second);
+        }
+        ofs.close();
+    }
+
+    void LSMIndex::deserialize(){
+        path meta_file = _working_dir / "index.meta";
+        ifstream ifs(meta_file, ios::binary);
+
+        if(!ifs.is_open()){
+            throw runtime_error(format("Unable to open file {}", meta_file.string()));
+        }
+        try{
+            uint8_t type_len;
+            string type(type_len, '\0');
+            ifs.read(reinterpret_cast<char*>(type_len), sizeof(type_len));
+            ifs.read(type.data(), type_len);
+
+            if (type != TYPE){
+                throw runtime_error(format("Invalid index type {}", type));
+            }
+
+            uint32_t map_size = SSTableIO::read_varint(ifs);
+            id_to_file.reserve(map_size);
+            file_to_id.reserve(map_size);
+
+            for (int i = 0; i < map_size; i++){
+                uint16_t filename_len = SSTableIO::read_varint(ifs);
+                string filename(filename_len, '\0');
+                ifs.read(filename.data(), filename_len);
+                uint32_t id = SSTableIO::read_varint(ifs);
+
+                path filepath = path(filename);
+                id_to_file[id] = filepath;
+                file_to_id[filepath] = id;
+            }
+
+            ifs.close();
+            _table_manager.load_metadata();
+        }
+        catch(const exception&){
+            id_to_file.clear();
+            file_to_id.clear();
+            ifs.close();
+            throw;
+        }
+
+    }
 }

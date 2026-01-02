@@ -39,7 +39,7 @@ namespace igrep::indexer::lsm_tree{
             void index_line(std::string& line, const uint32_t& file_id, const uint32_t& line_number, uint32_t& word_index);
             void index_file(const std::filesystem::path& filename);
 
-            static inline const std::string type = "lsm-tree";
+            static inline const std::string TYPE = "lsm-tree";
             const std::filesystem::path _working_dir;
 
             std::unordered_map<uint32_t, std::filesystem::path> id_to_file;
