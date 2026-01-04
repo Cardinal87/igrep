@@ -72,7 +72,8 @@ namespace igrep::indexer::lsm_tree{
     }
 
     vector<Position> LSMIndex::get_positions(std::string& query) const{
-        throw runtime_error("not implemented yet");
+        auto positions = _table_manager.find_word(query);
+        return positions;
     }
 
     bool LSMIndex::is_file_indexed(const path& filepath) const{
@@ -93,6 +94,11 @@ namespace igrep::indexer::lsm_tree{
             return {};
         }
         return it -> second;
+    }
+
+    void LSMIndex::compact(){
+        auto& talbes_meta = _table_manager.get_metadata();
+        _compaction_manager.compact(talbes_meta);
     }
 
 
@@ -216,6 +222,11 @@ namespace igrep::indexer::lsm_tree{
             ifs.close();
             throw;
         }
+        
+    }
 
+
+    bool LSMIndex::operator==(const LSMIndex& other) const{
+        return file_to_id == other.file_to_id;
     }
 }
