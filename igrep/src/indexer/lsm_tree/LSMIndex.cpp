@@ -68,11 +68,18 @@ namespace igrep::indexer::lsm_tree{
     }
 
     void LSMIndex::remove_file(const path& filepath){
-        //not implemented yet
+        if (!is_file_indexed(filepath)){
+            return;
+        }
+        path absolute_path = weakly_canonical(absolute(path(filepath)));
+        uint32_t file_id = file_to_id[absolute_path];
+
+        file_to_id.erase(absolute_path);
+        id_to_file.erase(file_id);
     }
 
     vector<Position> LSMIndex::get_positions(std::string& query) const{
-        auto positions = _table_manager.find_word(query);
+        auto positions = _table_manager.find_word(query, id_to_file);
         return positions;
     }
 
@@ -83,9 +90,7 @@ namespace igrep::indexer::lsm_tree{
 
     void LSMIndex::flush_memtable(){
         auto sorted_pairs = _mem_table.flush_to_sstable();
-        auto metadata_link = _table_manager.get_metadata();
-        
-        _compaction_manager.compact(metadata_link);
+        _table_manager.write(sorted_pairs);
     }
 
     path LSMIndex::get_path_by_id(const uint32_t& id) const{
@@ -98,7 +103,7 @@ namespace igrep::indexer::lsm_tree{
 
     void LSMIndex::compact(){
         auto& talbes_meta = _table_manager.get_metadata();
-        _compaction_manager.compact(talbes_meta);
+        _compaction_manager.compact(talbes_meta, id_to_file);
     }
 
 

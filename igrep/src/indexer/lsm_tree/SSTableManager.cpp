@@ -7,6 +7,7 @@
 #include<vector>
 #include<cstdint>
 #include<random>
+#include<unordered_map>
 
 using namespace std::filesystem;
 using namespace std;
@@ -96,7 +97,7 @@ namespace igrep::indexer::lsm_tree{
         }
     }
 
-    vector<Position> SSTableManager::find_word(const string& word) const {
+    vector<Position> SSTableManager::find_word(const string& word, const unordered_map<uint32_t, path>& files) const {
         
         vector<Position> result;
         for(const auto& level: _levels){
@@ -147,7 +148,10 @@ namespace igrep::indexer::lsm_tree{
                         uint32_t line_number = SSTableIO::read_varint(ifs);
                         uint32_t indent = SSTableIO::read_varint(ifs);
                         uint32_t word_index = SSTableIO::read_varint(ifs);
-
+                        
+                        if (!files.contains(file_id)){
+                            continue;
+                        }
                         result.emplace_back(file_id, line_number, indent, word_index);
                     } 
                     ifs.close();

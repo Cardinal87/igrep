@@ -8,7 +8,8 @@
 #include<ranges>
 #include<algorithm>
 #include <queue>
-
+#include<unordered_map>
+#include <functional>
 
 using namespace std;
 using namespace std::filesystem;
@@ -20,14 +21,18 @@ namespace igrep::indexer::lsm_tree{
     
     
 
-    void CompactionManager::compact(vector<vector<SSTableMeta>>& tables_meta) const{
+    void CompactionManager::compact(vector<vector<SSTableMeta>>& tables_meta, const unordered_map<uint32_t, path>& files) const{
 
         int8_t level_for_compact = pick_level_for_compact(tables_meta);
         
         vector<SSTableMeta> candidates = pick_candidates(level_for_compact, tables_meta);
 
         uint8_t next_level = level_for_compact + 1;
-        vector<SSTableMeta> new_tables_meta = merge(candidates, level_for_compact + 1);
+
+        auto exist_condition = [&files](uint32_t file_id) -> bool {
+            return files.contains(file_id);
+        };
+        vector<SSTableMeta> new_tables_meta = merge(candidates, level_for_compact + 1, exist_condition);
 
         if (!new_tables_meta.empty()){
             if (next_level >= tables_meta.size()) tables_meta.resize(next_level + 1);
@@ -94,7 +99,7 @@ namespace igrep::indexer::lsm_tree{
 
 
 
-    vector<SSTableMeta> CompactionManager::merge(const vector<SSTableMeta>& candidates, uint8_t write_level) const{
+    vector<SSTableMeta> CompactionManager::merge(const vector<SSTableMeta>& candidates, uint8_t write_level, const function<bool(uint32_t)>& exist_condition) const{
         
         if (candidates.empty()){
             return {};
@@ -129,10 +134,10 @@ namespace igrep::indexer::lsm_tree{
 
             SSTableIO::read_varint(table_stream.idx); // skip word amount
 
-            if (read_next_word(table_stream.idx, table_stream.table, table_stream.current_word, table_stream.current_positions)){
+            if (read_next_word(table_stream.idx, table_stream.table, table_stream.current_word, table_stream.current_positions, exist_condition)){
                 table_streams.push_back(move(table_stream));
                 pq.push(&table_streams.back());
-            }
+            }   
             else{
                 table_stream.idx.close();
                 table_stream.table.close();
@@ -169,7 +174,7 @@ namespace igrep::indexer::lsm_tree{
                         make_move_iterator(table_stream->current_positions.begin()), 
                         make_move_iterator(table_stream->current_positions.end()));
 
-            if (read_next_word(table_stream->idx, table_stream->table, table_stream->current_word, table_stream->current_positions)){
+            if (read_next_word(table_stream->idx, table_stream->table, table_stream->current_word, table_stream->current_positions, exist_condition)){
                 pq.push(table_stream);
             }
             else{
@@ -210,7 +215,7 @@ namespace igrep::indexer::lsm_tree{
     }
 
 
-    bool CompactionManager::read_next_word(ifstream& idx, ifstream& table, string& word, vector<common::Position>& positions) const{
+    bool CompactionManager::read_next_word(ifstream& idx, ifstream& table, string& word, vector<common::Position>& positions, const function<bool(uint32_t)>& exist_condition) const{
         if (idx.eof()){
             return false;
         }
@@ -225,15 +230,18 @@ namespace igrep::indexer::lsm_tree{
 
         uint32_t vector_size = SSTableIO::read_varint(table);
         positions.clear();
-        positions.resize(vector_size);
+        positions.reserve(vector_size);
 
         for(int i = 0; i < vector_size; i++){
             uint32_t file_id = SSTableIO::read_varint(table);
             uint32_t line_number = SSTableIO::read_varint(table);
             uint32_t indent = SSTableIO::read_varint(table);
             uint32_t word_index = SSTableIO::read_varint(table);
-
-            positions[i] = Position{file_id, line_number, indent, word_index};
+            
+            if (!exist_condition(file_id)){
+                continue;
+            }
+            positions.emplace_back(file_id, line_number, indent, word_index);
         } 
 
         return true;

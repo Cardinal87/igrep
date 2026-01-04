@@ -3,17 +3,25 @@
 #include<filesystem>
 #include<cstdint>
 #include<functional>
+#include<chrono>
 
 using namespace std;
 using namespace std::filesystem;
+using namespace std::chrono;
 
 namespace igrep::utils{
 
     uint32_t StringUtils::get_file_hash(const path& filepath){
 		hash<path> path_hasher;
-		size_t hash_value_size_t = path_hasher(filepath);
-		uint32_t hash_value = static_cast<uint32_t>(hash_value_size_t);
-		return hash_value;
+		size_t file_hash = path_hasher(filepath);
+
+		auto now = chrono::system_clock::now();
+		uint64_t timestamp = chrono::duration_cast<chrono::microseconds>(now.time_since_epoch()).count();
+		hash<uint64_t> ts_hasher;
+		size_t ts_hash = ts_hasher(timestamp);
+
+		file_hash ^= ts_hash + 0x9e3779b9 + (file_hash << 6) + (file_hash >> 2);
+		return static_cast<uint32_t>(file_hash ^ (file_hash >> 32));
 	}
 	
 	string StringUtils::normalize_line(string line) {
@@ -59,5 +67,6 @@ namespace igrep::utils{
 
 		return clean_line;
     }	
+	
 	
 }

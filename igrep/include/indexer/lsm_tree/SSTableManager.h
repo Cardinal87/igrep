@@ -8,6 +8,7 @@
 #include<cstdint>
 #include<iostream>   
 #include <fstream>
+#include<unordered_map>
 
 namespace igrep::indexer::lsm_tree
 {
@@ -16,7 +17,7 @@ namespace igrep::indexer::lsm_tree
             ~SSTableManager() = default;
             explicit SSTableManager(std::filesystem::path working_dir);
 
-            std::vector<igrep::indexer::common::Position> find_word(const std::string& word) const;
+            std::vector<igrep::indexer::common::Position> find_word(const std::string& word, const std::unordered_map<uint32_t, std::filesystem::path>& files) const;
             void write(const std::vector<std::pair<std::string, std::vector<common::Position>>>& sorted_positions);
 
             void save_metadata() const;
