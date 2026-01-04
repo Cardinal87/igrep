@@ -185,7 +185,15 @@ namespace igrep::indexer::lsm_tree{
 
         if (!prev_word.empty() && !accumulated.empty()) {
             merged_chunk.emplace_back(std::move(prev_word), std::move(accumulated));
-            SSTableIO::write_table(merged_chunk, _working_dir, write_level);
+            current_count += accumulated.size();
+            accumulated.clear();
+        }
+
+        if (!merged_chunk.empty()){
+            SSTableMeta table_meta = SSTableIO::write_table(merged_chunk, _working_dir, write_level);
+            new_table_meta.push_back(table_meta);
+            merged_chunk.clear();
+            current_count = 0;
         }
 
         return new_table_meta;
