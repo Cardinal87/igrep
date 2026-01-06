@@ -195,8 +195,8 @@ namespace igrep::indexer::lsm_tree{
         }
         try{
             uint8_t type_len;
+            ifs.read(reinterpret_cast<char*>(&type_len), sizeof(type_len));
             string type(type_len, '\0');
-            ifs.read(reinterpret_cast<char*>(type_len), sizeof(type_len));
             ifs.read(type.data(), type_len);
 
             if (type != TYPE){
