@@ -1,7 +1,6 @@
 #include<gtest/gtest.h>
-#include"indexer/FileIndexer.h"
 #include"indexer/common/Position.h"
-#include"indexer/Index.h"
+#include"indexer/lsm_tree/LSMIndex.h"
 #include"searcher/Searcher.h"
 #include"searcher/SearchResult.h"
 #include<filesystem>
@@ -10,16 +9,17 @@
 #include<vector>
 
 using namespace std;
+using namespace igrep::indexer::lsm_tree;
 using namespace std::filesystem;
 using namespace igrep::indexer;
 using namespace igrep::searcher;
 
 
 TEST(SearcherTest, SearchWord_ValidQuery_ReturnWithContext){
-    Index index;
-    FileIndexer indexer(index);
+    path working_dir = string(SOURCE_DIR) + "/testdata";
+    LSMIndex index(working_dir);
     path filepath = string(SOURCE_DIR) + "/testdata/wiki_data.txt"; 
-    indexer.index_file(filepath);
+    index.process_file(filepath);
     Searcher searcher(index);
     string expected_context = "The exact numbers of the fishing fleet, thought to be in poor condition, are not known. "
                               "In 1998, North Korea had eight large fishing vessels (3,750 displacement tonnage,  2,759 gross tons, 83 m length, 2,250 horsepower) "
@@ -39,10 +39,9 @@ TEST(SearcherTest, SearchWord_ValidQuery_ReturnWithContext){
 }
 
 TEST(SearcherTest, SearchQuery_QuerySeparatedByLines_ReturnCorrectContext){
-    Index index;
-    FileIndexer indexer(index);
+    LSMIndex index(string(SOURCE_DIR) + "/testdata");
     path filepath = string(SOURCE_DIR) + "/testdata/external.txt"; 
-    indexer.index_file(filepath);
+    index.process_file(filepath);
     Searcher searcher(index);
     string expected_context = "Data of external file\n" 
                               "of the directory testdata\n";
@@ -59,10 +58,9 @@ TEST(SearcherTest, SearchQuery_QuerySeparatedByLines_ReturnCorrectContext){
 
 
 TEST(SearcherTest, SearchQuery_Empty_ReturnEmpty){
-    Index index;
-    FileIndexer indexer(index);
+    LSMIndex index(string(SOURCE_DIR) + "/testdata");
     path filepath = string(SOURCE_DIR) + "/testdata/wiki_data.txt"; 
-    indexer.index_file(filepath);
+    index.process_file(filepath);
     Searcher searcher(index);
 
 
@@ -73,10 +71,9 @@ TEST(SearcherTest, SearchQuery_Empty_ReturnEmpty){
 }
 
 TEST(SearcherTest, SearchWord_NonExistent_ReturnEmpty){
-    Index index;
-    FileIndexer indexer(index);
+    LSMIndex index(string(SOURCE_DIR) + "/testdata");
     path filepath = string(SOURCE_DIR) + "/testdata/wiki_data.txt"; 
-    indexer.index_file(filepath);
+    index.process_file(filepath);
     Searcher searcher(index);
 
 

@@ -9,8 +9,7 @@
 #include <filesystem>
 #include <format>
 #include <algorithm>
-#include "indexer/FileIndexer.h"
-#include "indexer/Index.h"
+#include "indexer/lsm_tree/LSMIndex.h"
 #include "searcher/Searcher.h"
 #include "searcher/SearchResult.h"
 #include <cstdlib>

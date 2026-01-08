@@ -2,7 +2,7 @@
 
 #include<vector>
 #include<string>
-#include "indexer/Index.h"
+#include "indexer/lsm_tree/LSMIndex.h"
 #include "indexer/common/Position.h"
 #include "SearchResult.h"
 #include "SearchChain.h"
@@ -12,7 +12,7 @@
 namespace igrep::searcher{
     class Searcher{
         public:
-            explicit Searcher(const igrep::indexer::Index& index);
+            explicit Searcher(const igrep::indexer::lsm_tree::LSMIndex& index);
 
             std::vector<SearchResult> search(const std::string& query) const;
 
@@ -21,7 +21,7 @@ namespace igrep::searcher{
             std::vector<SearchResult> map_result(const std::vector<igrep::searcher::SearchChain>& chains) const;
             std::string get_context(const igrep::searcher::SearchChain& chain) const;
 
-            const igrep::indexer::Index& index_;
+            const igrep::indexer::lsm_tree::LSMIndex& index_;
             
         
 

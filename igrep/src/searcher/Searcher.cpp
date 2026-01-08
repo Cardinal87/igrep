@@ -1,5 +1,5 @@
 
-#include "indexer/Index.h"
+#include "indexer/lsm_tree/LSMIndex.h"
 #include "searcher/Searcher.h"
 #include "searcher/SearchResult.h"
 #include "searcher/SearchChain.h"
@@ -13,7 +13,7 @@
 #include<filesystem>
 #include<stdexcept>
 
-using namespace igrep::indexer;
+using namespace igrep::indexer::lsm_tree;
 using namespace igrep::indexer::common;
 using namespace igrep::searcher;
 using namespace igrep::utils;
@@ -23,7 +23,7 @@ using namespace std;
 namespace igrep::searcher{
     
 
-    Searcher::Searcher(const Index& index) : index_(index){
+    Searcher::Searcher(const LSMIndex& index) : index_(index){
         
     }
 

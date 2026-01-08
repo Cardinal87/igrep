@@ -5,7 +5,7 @@
 #include"utils/StringUtils.h"
 using namespace std;
 using namespace std::filesystem;
-using namespace igrep::indexer;
+using namespace igrep::indexer::lsm_tree;
 using namespace igrep::searcher;
 
 int main(int argc, char* argv[])
@@ -14,11 +14,11 @@ int main(int argc, char* argv[])
 		vector<string> args(argv + 1, argv + argc);
 		const char* home_var = getenv("HOME");
 		if (!home_var) {
-			std::cerr << "Error: HOME environment variable not set" << std::endl;
+			std::cerr << "Error: HOME environment variable is not set" << std::endl;
 			return 1;
 		}
 		path igrep_dir = path(home_var) / ".config" / "igrep";
-		path index_path = igrep_dir / "index.bin";
+		path index_default_folder = igrep_dir / "index";
 
 		if(!exists(igrep_dir)){
 			create_directories(igrep_dir);
@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 				<< "  Usage: igrep create [PARAMS]\n"
 				<< "  Optional flags:\n"
 				<< "    " << left << setw(flagWidth) << "-d, --destination"
-					<< setw(descWidth) << "Specify path for index file " + format("(default: {})", index_path.string()) << "\n"
+					<< setw(descWidth) << "Specify directory path to index files " + format("(default: {})", index_default_folder.string()) << "\n"
 				<< "  Examples:\n"
 				<< "    igrep create\n"
 				<< "    igrep create -d ~/myindex.bin\n\n"
@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 					<< setw(descWidth) << "Specify directory for recursive indexing" << "\n"
 				<< "  Optional flags:\n"
 				<< "    " << left << setw(flagWidth) << "-s, --source-index" 
-					<< setw(descWidth) << "Specify path to index file " + format("(default: {})", index_path.string()) << "\n"
+					<< setw(descWidth) << "Specify directory path to index files " + format("(default: {})", index_default_folder.string()) << "\n"
 				<< "  Examples:\n"
 				<< "    igrep index -f ./mylog.txt\n"
 				<< "    igrep index -d ./logs -s ~/myindex.bin\n\n"
@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
 					<< setw(descWidth) << "Specify file path (file does not have to exist)" << "\n"
 				<< "  Optional flags:\n"
 				<< "    " << left << setw(flagWidth) << "-s, --source-index" 
-					<< setw(descWidth) << "Specify path to index file " + format("(default: {})", index_path.string()) << "\n"
+					<< setw(descWidth) << "Specify directory path to index files " + format("(default: {})", index_default_folder.string()) << "\n"
 				<< "  Examples:\n"
 				<< "    igrep remove -f ./old-log.txt -s  ~/myindex.bin\n\n"
 				
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 					<< setw(descWidth) << "Specify string you want to find" << "\n"
 				<< "  Optional flags:\n"
 				<< "    " << left << setw(flagWidth) << "-s, --source-index" 
-					<< setw(descWidth) << "Specify path to index file " + format("(default: {})", index_path.string()) << "\n"
+					<< setw(descWidth) << "Specify directory path to index files " + format("(default: {})", index_default_folder.string()) << "\n"
 				<< "  Examples:\n"
 				<< "    igrep find -q ERROR\n";
 
@@ -90,19 +90,17 @@ int main(int argc, char* argv[])
 		}
 
 		if (args[0] == "create"){
-			Index index;
 			for(size_t i = 0; i < args.size(); i++){
 				if (args[i] == "-d" || args[i] == "--destination"){
 					if(i + 1 < args.size()){
-						path filepath = args[i + 1];
-						if (filepath.extension() != ".bin"){
-							cerr << format("Error: invalid index file format {}", filepath.string()) << "\n"
-								 << "File must have .bin format" << endl;
+						path path = args[i + 1];
+						if (!is_directory(path)){
+							cerr << format("Error: provided path is not a directory {}", path.string()) << endl;
 							return 1;
 						}
-						index_path = filepath;
-						index.serialize(index_path);
-						cout << format("Index was successfully created at {}", index_path.string()) << endl;
+						LSMIndex index(path);
+						index.serialize();
+						cout << format("Index was successfully created at {}", path.string()) << endl;
 						return 0;
 					}
 					else{
@@ -111,8 +109,9 @@ int main(int argc, char* argv[])
 					}
 				}
 			}
-			index.serialize(index_path);
-			cout << format("Index was successfully created at {}", index_path.string()) << endl;
+			LSMIndex index(index_default_folder);
+			index.serialize();
+			cout << format("Index was successfully created at {}", index_default_folder.string()) << endl;
 			return 0;
 		}
 
@@ -148,8 +147,12 @@ int main(int argc, char* argv[])
 				}
 				else if (args[i] == "-s" || args[i] == "--source-index"){
 					if(i + 1 < args.size()){
-						path path_to_index = args[i + 1];
-						index_path = path_to_index;
+						path path = args[i + 1];
+						if (!is_directory(path)){
+							cerr << format("Error: provided path is not a directory {}", path.string()) << endl;
+							return 1;
+						}
+						index_default_folder = path;
 						i++;
 					}
 					else{
@@ -159,9 +162,8 @@ int main(int argc, char* argv[])
 				}
 			}
 
-			Index index;
-			index.deserialize(index_path);
-			FileIndexer indexer(index);
+			LSMIndex index(index_default_folder);
+			index.deserialize();
 			
 			if (!has_file && !has_dir){
 				cerr << "Error: either -f or -d must be specified" << endl;
@@ -169,19 +171,15 @@ int main(int argc, char* argv[])
 			}
 
 			if (has_file){
-				bool is_success = indexer.index_file(file_path);
-				if (is_success){
-					cout << "File was successfully indexed" << endl;
-				} else{
-					cout << "File has already been indexed" << endl;
-				}
+				index.process_file(file_path);
+				cout << "File was successfully indexed" << endl;
 			}
 			if (has_dir){
-				indexer.index_directory(dir_path);
+				index.process_directory(dir_path);
 				cout << "Directory was successfully indexed" << endl;
 			}
 			
-			index.serialize(index_path);
+			index.serialize();
 			return 0;
 		}
 		
@@ -202,7 +200,12 @@ int main(int argc, char* argv[])
 				}
 				else if (args[i] == "-s" || args[i] == "--source-index"){
 					if(i + 1 < args.size()){
-						index_path = args[i + 1];
+						path path = args[i + 1];
+						if (!is_directory(path)){
+							cerr << format("Error: provided path is not a directory {}", path.string()) << endl;
+							return 1;
+						}
+						index_default_folder = path;
 						i++;
 					}
 					else{
@@ -212,22 +215,17 @@ int main(int argc, char* argv[])
 				}
 			}
 
-			Index index;
-			index.deserialize(index_path);
+			LSMIndex index(index_default_folder);
+			index.deserialize();
 
 			if (!has_file){
 				cerr << "Error: -f flag must be specified" << endl;
 				return 1;
 			}
 
-			bool is_success = index.remove_file(file_path);
-			if (is_success){
-				cout << "File was successfully removed from index" << endl;
-			} else{
-				cout << format("{} was not indexed", file_path.string()) << endl;
-			}
+			index.remove_file(file_path);
 			
-			index.serialize(index_path);
+			index.serialize();
 			return 0;
 		}
 
@@ -249,7 +247,12 @@ int main(int argc, char* argv[])
 				}
 				else if (args[i] == "-s" || args[i] == "--source-index"){
 					if(i + 1 < args.size()){
-						index_path = args[i + 1];
+						path path = args[i + 1];
+						if (!is_directory(path)){
+							cerr << format("Error: provided path is not a directory {}", path.string()) << endl;
+							return 1;
+						}
+						index_default_folder = path;
 						i++;
 					}
 					else{
@@ -261,8 +264,8 @@ int main(int argc, char* argv[])
 			}
 
 			
-			Index index;
-			index.deserialize(index_path);
+			LSMIndex index(index_default_folder);
+			index.deserialize();
 			Searcher searcher(index);
 
 			if (!has_query){
