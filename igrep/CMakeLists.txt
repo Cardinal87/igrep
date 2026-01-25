@@ -50,6 +50,7 @@ FetchContent_MakeAvailable(googletest)
 add_executable(igrep_tests
   tests/test_string_utils.cpp
   tests/test_searcher.cpp
+  tests/test_memtable.cpp
   src/indexer/lsm_tree/MemTable.cpp
   src/indexer/lsm_tree/SSTableManager.cpp
   src/indexer/lsm_tree/CompactionManager.cpp
@@ -63,4 +64,5 @@ target_link_libraries(igrep_tests PRIVATE gtest gtest_main)
 target_include_directories(igrep_tests PRIVATE include)
 target_compile_definitions(igrep_tests PRIVATE SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 
-add_test(NAME AllTests COMMAND igrep_tests)
+include(GoogleTest)
+gtest_discover_tests(igrep_tests)
