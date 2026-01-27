@@ -3,6 +3,7 @@
 #include"indexer/lsm_tree/LSMIndex.h"
 #include"searcher/Searcher.h"
 #include"searcher/SearchResult.h"
+#include"test_common.h"
 #include<filesystem>
 #include<fstream>
 #include<string>
@@ -15,9 +16,10 @@ using namespace igrep::indexer;
 using namespace igrep::searcher;
 
 
-TEST(SearcherTest, SearchWord_ValidQuery_ReturnWithContext){
-    path working_dir = string(SOURCE_DIR) + "/testdata";
-    LSMIndex index(working_dir);
+class SearcherTest : public BaseTestFixture {};
+
+TEST_F(SearcherTest, SearchWord_ValidQuery_ReturnWithContext){
+    LSMIndex index(temp_path);
     path filepath = string(SOURCE_DIR) + "/testdata/wiki_data.txt"; 
     index.process_file(filepath);
     Searcher searcher(index);
@@ -38,8 +40,8 @@ TEST(SearcherTest, SearchWord_ValidQuery_ReturnWithContext){
 
 }
 
-TEST(SearcherTest, SearchQuery_QuerySeparatedByLines_ReturnCorrectContext){
-    LSMIndex index(string(SOURCE_DIR) + "/testdata");
+TEST_F(SearcherTest, SearchQuery_QuerySeparatedByLines_ReturnCorrectContext){
+    LSMIndex index(temp_path);
     path filepath = string(SOURCE_DIR) + "/testdata/external.txt"; 
     index.process_file(filepath);
     Searcher searcher(index);
@@ -57,8 +59,8 @@ TEST(SearcherTest, SearchQuery_QuerySeparatedByLines_ReturnCorrectContext){
 }
 
 
-TEST(SearcherTest, SearchQuery_Empty_ReturnEmpty){
-    LSMIndex index(string(SOURCE_DIR) + "/testdata");
+TEST_F(SearcherTest, SearchQuery_Empty_ReturnEmpty){
+    LSMIndex index(temp_path);
     path filepath = string(SOURCE_DIR) + "/testdata/wiki_data.txt"; 
     index.process_file(filepath);
     Searcher searcher(index);
@@ -70,8 +72,8 @@ TEST(SearcherTest, SearchQuery_Empty_ReturnEmpty){
     ASSERT_TRUE(results.empty());
 }
 
-TEST(SearcherTest, SearchWord_NonExistent_ReturnEmpty){
-    LSMIndex index(string(SOURCE_DIR) + "/testdata");
+TEST_F(SearcherTest, SearchWord_NonExistent_ReturnEmpty){
+    LSMIndex index(temp_path);
     path filepath = string(SOURCE_DIR) + "/testdata/wiki_data.txt"; 
     index.process_file(filepath);
     Searcher searcher(index);
