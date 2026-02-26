@@ -49,6 +49,15 @@ int main(int argc, char* argv[])
 				<< "    igrep create\n"
 				<< "    igrep create -d ~/myindex\n\n"
 
+				<< "COMPACT INDEX:\n"
+				<< "  Usage: igrep compact [PARAMS]\n"
+				<< "  Optional flags:\n"
+				<< "    " << left << setw(flagWidth) << "-s, --source-index" 
+					<< setw(descWidth) << "Specify directory path to index files " + format("(default: {})", index_default_folder.string()) << "\n"
+				<< "  Examples:\n"
+				<< "    igrep compact\n"
+				<< "    igrep compact -s ~/myindex\n\n"
+
 				<< "INDEXING FILES:\n"
 				<< "  Usage: igrep index [PARAMS]\n"
 				<< "  One of the next flags is required:\n"
@@ -116,6 +125,30 @@ int main(int argc, char* argv[])
 			return 0;
 		}
 
+		if (args[0] == "compact"){
+			for(size_t i = 0; i < args.size(); i++){
+				if (args[i] == "-s" || args[i] == "--source-index"){
+					if(i + 1 < args.size()){
+						path path = args[i + 1];
+						if (!is_directory(path)){
+							cerr << format("Error: provided path is not a directory {}", path.string()) << endl;
+							return 1;
+						}
+						index_default_folder = path;
+						i++;
+					}
+					else{
+						cerr << "Error: source index path was not provided" << endl;
+						return 1;
+					}
+				}
+			}
+			LSMIndex index(index_default_folder);
+			index.deserialize();
+			index.compact();
+			index.serialize();
+			return 0;
+		}
 
 		if (args[0] == "index"){
 			bool has_file = false;
