@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 		if (args.empty()
 		|| find(args.begin(), args.end(), "-v") != args.end()
 		|| find(args.begin(), args.end(), "--version") != args.end()){
-			cout << "igrep 1.2.0" << endl << "Try 'igrep -h' to get more information" << endl;
+			cout << "igrep 2.0.0" << endl << "Try 'igrep -h' to get more information" << endl;
 			return 0;
 		}
 		if (find(args.begin(), args.end(), "-h") != args.end()
@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 					<< setw(descWidth) << "Specify directory path to index files " + format("(default: {})", index_default_folder.string()) << "\n"
 				<< "  Examples:\n"
 				<< "    igrep create\n"
-				<< "    igrep create -d ~/myindex.bin\n\n"
+				<< "    igrep create -d ~/myindex\n\n"
 
 				<< "INDEXING FILES:\n"
 				<< "  Usage: igrep index [PARAMS]\n"
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 					<< setw(descWidth) << "Specify directory path to index files " + format("(default: {})", index_default_folder.string()) << "\n"
 				<< "  Examples:\n"
 				<< "    igrep index -f ./mylog.txt\n"
-				<< "    igrep index -d ./logs -s ~/myindex.bin\n\n"
+				<< "    igrep index -d ./logs -s ~/myindex\n\n"
 				
 				<< "DELETE FILES FROM INDEX:\n"
 				<< "  Usage: igrep remove [PARAMS]\n"
@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 				<< "    " << left << setw(flagWidth) << "-s, --source-index" 
 					<< setw(descWidth) << "Specify directory path to index files " + format("(default: {})", index_default_folder.string()) << "\n"
 				<< "  Examples:\n"
-				<< "    igrep remove -f ./old-log.txt -s  ~/myindex.bin\n\n"
+				<< "    igrep remove -f ./old-log.txt -s ~/myindex\n\n"
 				
 				<< "FIND QUERIES:\n"
 				<< "  Usage: igrep find [PARAMS]\n"
@@ -109,6 +109,7 @@ int main(int argc, char* argv[])
 					}
 				}
 			}
+			create_directories(index_default_folder);
 			LSMIndex index(index_default_folder);
 			index.serialize();
 			cout << format("Index was successfully created at {}", index_default_folder.string()) << endl;
