@@ -169,7 +169,7 @@ namespace igrep::indexer::lsm_tree{
         }
 
         uint8_t type_len = TYPE.size();
-        ofs.write(reinterpret_cast<char*>(type_len), sizeof(type_len));
+        ofs.write(reinterpret_cast<char*>(&type_len), sizeof(type_len));
         ofs.write(TYPE.data(), type_len);
 
         uint32_t map_size = file_to_id.size();
