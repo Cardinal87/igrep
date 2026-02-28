@@ -15,28 +15,32 @@ Igrep CLI tool is an indexed version of base Unix grep that allows index file be
 Usage: igrep [OPTION] [PARAM]\
 Possible options and flags:\
 **`create`** — Create new index file
-  * `-d, --destination <PATH>` — Specify path for index file. **Optional** (default: ~/.config/igrep/index.bin)
-    * Example: `igrep create -d ~/myindex.bin`
+  * `-d, --destination <PATH>` — Specify path for index file. **Optional** (default: ~/.config/igrep/index)
+    * Example: `igrep create -d ~/myindex`
 
 **`index`** — Add files to index
   * `-f, --file <PATH>` — Index single file.
     * Example: `igrep index -f ./data.txt`
   * `-d, --dir <PATH>` — Recursively index all files in directory.
     * Example: `igrep index -d ./logs`
-  * `-s, --source-index <PATH>` — Specify path to source index file. **Optional** (default: ~/.config/igrep/index.bin)
-    * Example: `igrep index -d ./logs -s ~/myindex.bin`
+  * `-s, --source-index <PATH>` — Specify path to source index file. **Optional** (default: ~/.config/igrep/index)
+    * Example: `igrep index -d ./logs -s ~/myindex`
+
+**`compact`** — Compact index file (optimize storage, remove stale entries)
+  * `-s, --source-index <PATH>` — Specify path to source index file. **Optional** (default: ~/.config/igrep/index)
+    * Example: `igrep compact -s ~/myindex`
 
 **`remove`** — Remove file from index
   * `-f, --file <PATH>` — Remove file from index.
     * Example: `igrep remove -f ./old-file.log`
-  * `-s, --source-index <PATH>` — Specify path to source index file. **Optional** (default: ~/.config/igrep/index.bin)
-    * Example: `igrep remove -f ./old-log.txt -s ~/myindex.bin`
+  * `-s, --source-index <PATH>` — Specify path to source index file. **Optional** (default: ~/.config/igrep/index)
+    * Example: `igrep remove -f ./old-log.txt -s ~/myindex`
 
 **`find`** — Find using index
   * `-q, --query <QUERY>` — Find query by indexed files.
     * Example: `igrep find -q "ERROR"`
-  * `-s, --source-index <PATH>` — Specify path to source index file. **Optional** (default: ~/.config/igrep/index.bin)
-    * Example: `igrep find -q "ERROR" -s ~/myindex.bin`
+  * `-s, --source-index <PATH>` — Specify path to source index file. **Optional** (default: ~/.config/igrep/index)
+    * Example: `igrep find -q "ERROR" -s ~/myindex`
 
 
 `-h, --help` — Show manual.\
