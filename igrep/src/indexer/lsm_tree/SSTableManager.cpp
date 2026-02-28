@@ -27,7 +27,6 @@ namespace igrep::indexer::lsm_tree{
         }
         
         try{
-
             uint32_t levels_size = SSTableIO::read_varint(ifs);
             _levels.resize(levels_size);
             
@@ -71,7 +70,6 @@ namespace igrep::indexer::lsm_tree{
         }
 
         try{
-
             SSTableIO::write_varint(ofs, _levels.size());
 
             for(const auto& level: _levels){

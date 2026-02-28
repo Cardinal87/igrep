@@ -6,7 +6,6 @@
 #include<fstream>
 #include<cstdint>
 #include<random>
-
 using namespace std;
 using namespace std::filesystem;
 using namespace igrep::indexer::common;
@@ -88,7 +87,6 @@ namespace igrep::indexer::lsm_tree
         }
         ofs.close();
         idx.close();
-        
         return SSTableMeta{level, table_id, sorted_positions.front().first, sorted_positions.back().first};
     }
 } // namespace igrep::indexer::lsm_tree

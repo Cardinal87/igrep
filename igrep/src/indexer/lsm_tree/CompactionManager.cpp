@@ -33,11 +33,9 @@ namespace igrep::indexer::lsm_tree{
             return files.contains(file_id);
         };
         vector<SSTableMeta> new_tables_meta = merge(candidates, level_for_compact + 1, exist_condition);
-
+        remove_old_tables(candidates, tables_meta, level_for_compact);
         if (!new_tables_meta.empty()){
             if (next_level >= tables_meta.size()) tables_meta.resize(next_level + 1);
-
-            remove_old_tables(new_tables_meta, tables_meta, level_for_compact);
             tables_meta[next_level].insert(tables_meta[next_level].end(), new_tables_meta.begin(), new_tables_meta.end());
             sort(tables_meta[next_level].begin(), tables_meta[next_level].end(), [](const SSTableMeta& a, const SSTableMeta& b) {
                 return a.first_word < b.first_word;
@@ -55,7 +53,6 @@ namespace igrep::indexer::lsm_tree{
                 return lv;
             }
         }
-
         return -1;
     }
 
@@ -119,7 +116,7 @@ namespace igrep::indexer::lsm_tree{
         priority_queue<TableStream*, vector<TableStream*>, decltype(comparator)> pq(comparator); 
 
         vector<TableStream> table_streams;
-
+        table_streams.reserve(candidates.size());
         for(const auto& candidate: candidates){
             TableStream table_stream;
 
@@ -157,17 +154,20 @@ namespace igrep::indexer::lsm_tree{
             pq.pop();
 
             if (!prev_word.empty() && table_stream->current_word != prev_word) {
-                merged_chunk.emplace_back(std::move(prev_word), std::move(accumulated));
-                current_count += accumulated.size();
-                accumulated.clear();
+                if (!accumulated.empty()){
+                    merged_chunk.emplace_back(std::move(prev_word), std::move(accumulated));
+                    current_count += accumulated.size();
 
-                if (current_count > MAX_CHUNK_COUNT) {
-                    SSTableMeta table_meta = SSTableIO::write_table(merged_chunk, _working_dir, write_level);
-                    new_table_meta.push_back(table_meta);
+                    if (current_count > MAX_CHUNK_COUNT) {
+                        SSTableMeta table_meta = SSTableIO::write_table(merged_chunk, _working_dir, write_level);
+                        new_table_meta.push_back(table_meta);
 
-                    merged_chunk.clear();
-                    current_count = 0;
+                        merged_chunk.clear();
+                        current_count = 0;
+                    }
                 }
+
+                accumulated.clear();
             }
             prev_word = table_stream->current_word;
             accumulated.insert(accumulated.end(), 
