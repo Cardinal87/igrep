@@ -21,3 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Index format**: Optimized memory and disk usage by approximately 50%.
   - File paths are now stored in a dictionary structure, mapped to unique numerical IDs.
   - All numerical values are encoding using VarInt encoding
+
+
+## [2.0.0] - 2026-02-28
+### Added
+- LSM-tree architecture with SSTable storage, enabling indexing of large datasets without loading the entire index into RAM.
+- Compact command to optimize the index by removing stale entries and merging SSTable levels.
+
+### Changed 
+- Complete overhaul of the indexing engine: replaced in‑memory dictionary with disk‑based LSM tree. Index format is now incompatible with versions 1.x.
